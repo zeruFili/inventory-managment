@@ -164,7 +164,6 @@ export const RentalCalendar: React.FC<RentalCalendarProps> = ({ onSelectRental }
             <option value="Confirmed">Confirmed</option>
             <option value="Active">Active (In Transit / On Site)</option>
             <option value="Overdue">Overdue Return</option>
-            <option value="Returned">Returned</option>
           </select>
         </div>
 

@@ -27,7 +27,6 @@ export const RentalsView: React.FC = () => {
       if (activeTab === "Active" && r.status !== "Active") return false;
       if (activeTab === "Confirmed" && r.status !== "Confirmed") return false;
       if (activeTab === "Overdue" && !r.isOverdue && r.status !== "Overdue") return false;
-      if (activeTab === "Returned" && r.status !== "Returned") return false;
 
       const q = search.toLowerCase();
       return (
@@ -76,7 +75,7 @@ export const RentalsView: React.FC = () => {
       <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-1 overflow-x-auto pb-1 border-b md:border-b-0 border-gray-100">
-            {["All", "Active", "Confirmed", "Overdue", "Returned"].map((tab) => (
+            {["All", "Active", "Confirmed", "Overdue"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}

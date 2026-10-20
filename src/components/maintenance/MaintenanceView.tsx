@@ -6,6 +6,7 @@ import Badge from "../common/Badge";
 import ReturnCheckInModal from "./ReturnCheckInModal";
 import DamageReportModal from "./DamageReportModal";
 import WorkOrderModal from "./WorkOrderModal";
+import BackToInventoryModal from "./BackToInventoryModal";
 
 export const MaintenanceView: React.FC = () => {
   const { rentals, damageReports, workOrders, materials, can } = useApp();
@@ -17,6 +18,7 @@ export const MaintenanceView: React.FC = () => {
   const [isDamageModalOpen, setIsDamageModalOpen] = useState(false);
   const [isWorkOrderModalOpen, setIsWorkOrderModalOpen] = useState(false);
   const [workOrderToEdit, setWorkOrderToEdit] = useState<RepairWorkOrder | null>(null);
+  const [workOrderToRestock, setWorkOrderToRestock] = useState<RepairWorkOrder | null>(null);
 
   const activeRentalsToReturn = rentals.filter((r) => r.status === "Active" || r.status === "Overdue");
   const totalRepairCost = workOrders.reduce((acc, wo) => acc + wo.totalCost, 0);
@@ -116,7 +118,7 @@ export const MaintenanceView: React.FC = () => {
             }`}
           >
             <Icon name="wrench" size={14} />
-            Repair Work Orders ({workOrders.length})
+            Maintained Orders ({workOrders.length})
           </button>
           <button
             onClick={() => setActiveTab("damage")}
@@ -211,18 +213,36 @@ export const MaintenanceView: React.FC = () => {
                     </td>
 
                     <td className="py-3 px-4 text-right">
-                      {can("manage_maintenance") && (
-                        <button
-                          onClick={() => {
-                            setWorkOrderToEdit(wo);
-                            setIsWorkOrderModalOpen(true);
-                          }}
-                          className="px-2.5 py-1 text-[11px] font-bold text-emerald-950 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors"
-                          title="Update work order or sign off inspection"
-                        >
-                          Update / Certify
-                        </button>
-                      )}
+                      <div className="flex items-center justify-end gap-1.5">
+                        {can("manage_maintenance") && (
+                          <>
+                            {wo.status !== "Completed" ? (
+                              <button
+                                onClick={() => setWorkOrderToRestock(wo)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-white bg-emerald-950 hover:bg-emerald-900 rounded-md transition-colors shadow-2xs"
+                                title="Restock this equipment back to inventory and select its condition"
+                              >
+                                <Icon name="box" size={12} />
+                                Back to Inventory
+                              </button>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-md">
+                                <Icon name="check" size={10} /> Restocked ({wo.postRepairCondition || "Good"})
+                              </span>
+                            )}
+                            <button
+                              onClick={() => {
+                                setWorkOrderToEdit(wo);
+                                setIsWorkOrderModalOpen(true);
+                              }}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                              title="Update work order or edit details"
+                            >
+                              Update
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -348,6 +368,12 @@ export const MaintenanceView: React.FC = () => {
         isOpen={isWorkOrderModalOpen}
         onClose={() => setIsWorkOrderModalOpen(false)}
         orderToUpdate={workOrderToEdit}
+      />
+
+      <BackToInventoryModal
+        isOpen={!!workOrderToRestock}
+        onClose={() => setWorkOrderToRestock(null)}
+        workOrder={workOrderToRestock}
       />
     </div>
   );
