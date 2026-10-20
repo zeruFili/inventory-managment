@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { RepairWorkOrder, MaterialCondition } from "../../types";
 import { useApp } from "../../context/AppContext";
 import Modal from "../common/Modal";
+import MaterialSelectorSection from "../common/MaterialSelectorSection";
 
 interface WorkOrderModalProps {
   isOpen: boolean;
@@ -81,26 +82,22 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
       title={orderToUpdate ? `Update Work Order: ${orderToUpdate.workOrderNumber}` : "Create Maintenance Work Order"}
       subtitle="Assign technicians, track repair expenses, and complete final safety inspections"
       badge="REPAIR & OVERHAUL"
-      maxWidth="xl"
+      maxWidth="2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Equipment under repair *</label>
-            <select
-              value={materialId}
-              disabled={!!orderToUpdate}
-              onChange={(e) => setMaterialId(e.target.value)}
-              className="w-full text-xs font-medium border border-gray-300 rounded-lg p-2.5 bg-white text-gray-900 outline-none"
-            >
-              {materials.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name} ({m.underRepair} currently in repair)
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Reusable Equipment Selector */}
+        <MaterialSelectorSection
+          mode="maintenance"
+          singleSelection
+          selectedMaterialId={materialId}
+          onSelectMaterial={(mat) => setMaterialId(mat.id)}
+          title="Equipment Under Repair *"
+          subtitle="Select the physical equipment unit assigned to this maintenance work order"
+          addButtonLabel="Select Equipment"
+          disabled={!!orderToUpdate}
+        />
 
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Assigned Technician / Shop *</label>
             <input
@@ -111,9 +108,7 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
               className="w-full text-xs font-medium border border-gray-300 rounded-lg p-2.5 bg-white text-gray-900 outline-none"
             />
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Priority Level</label>
             <select

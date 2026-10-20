@@ -258,16 +258,16 @@ export const DashboardView: React.FC<{
               </div>
             </div>
 
-            {/* Upcoming Logistics / Deliveries */}
+            {/* Upcoming Client Reservations & Dispatches */}
             <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                   <div>
-                    <h2 className="text-base font-bold text-gray-900 font-display">Logistics & Dispatches</h2>
-                    <p className="text-xs text-gray-500">Upcoming vehicle routes and collections</p>
+                    <h2 className="text-base font-bold text-gray-900 font-display">Client Reservations & Dispatches</h2>
+                    <p className="text-xs text-gray-500">Upcoming rental bookings and equipment dispatches</p>
                   </div>
                   <button
-                    onClick={() => onNavigate("Logistics")}
+                    onClick={() => onNavigate("Rentals")}
                     className="text-xs font-semibold text-emerald-800 hover:text-emerald-900 flex items-center gap-1"
                   >
                     View All <Icon name="arrow" size={12} />
@@ -275,38 +275,40 @@ export const DashboardView: React.FC<{
                 </div>
 
                 <div className="divide-y divide-gray-100 mt-2">
-                  {todayTasks.map((task) => (
-                    <div key={task.id} className="py-3 flex items-start justify-between gap-3">
+                  {rentals.slice(0, 4).map((rent) => (
+                    <div key={rent.id} className="py-3 flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                            task.type === "Delivery"
-                              ? "bg-emerald-50 text-emerald-800 border border-emerald-200/60"
-                              : "bg-amber-50 text-amber-800 border border-amber-200/60"
-                          }`}
-                        >
-                          <Icon name={task.type === "Delivery" ? "truck" : "package"} size={16} />
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200/60">
+                          <Icon name="calendar" size={16} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <strong className="text-xs font-bold text-gray-900">{task.customerName}</strong>
+                            <strong className="text-xs font-bold text-gray-900">{rent.customerName}</strong>
                             <Badge
-                              tone={task.status === "In Transit" ? "yellow" : task.status === "Completed" ? "green" : "gray"}
+                              tone={
+                                rent.status === "Active"
+                                  ? "green"
+                                  : rent.status === "Confirmed"
+                                  ? "yellow"
+                                  : rent.status === "Overdue"
+                                  ? "red"
+                                  : "gray"
+                              }
                               size="sm"
                             >
-                              {task.status}
+                              {rent.status}
                             </Badge>
                           </div>
                           <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
-                            {task.deliveryAddress} · {task.materials.length} items
+                            {rent.items.length} material lines · {rent.reservationNumber}
                           </p>
-                          <span className="text-[10px] text-gray-400 font-medium">
-                            Assigned: {task.assignedPersonName} ({task.vehicleInfo})
+                          <span className="text-[10px] text-gray-400 font-medium font-mono">
+                            {rent.startDate.slice(0, 10)} → {rent.expectedReturnDate.slice(0, 10)}
                           </span>
                         </div>
                       </div>
-                      <span className="text-[11px] font-bold text-gray-700 bg-gray-50 px-2 py-1 rounded-md border border-gray-200/60 shrink-0">
-                        {task.scheduledDateTime.slice(11, 16)}
+                      <span className="text-[11px] font-bold text-gray-700 bg-gray-50 px-2 py-1 rounded-md border border-gray-200/60 shrink-0 font-display">
+                        ${rent.totalCost.toLocaleString()}
                       </span>
                     </div>
                   ))}
@@ -314,10 +316,10 @@ export const DashboardView: React.FC<{
               </div>
 
               <button
-                onClick={() => onNavigate("Logistics")}
+                onClick={() => onNavigate("Rentals")}
                 className="w-full mt-4 py-2.5 px-3 bg-emerald-50/70 hover:bg-emerald-100 text-emerald-900 border border-emerald-200/80 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
               >
-                <Icon name="truck" size={14} /> Open Driver & Logistics Portal
+                <Icon name="calendar" size={14} /> View All Rental Reservations
               </button>
             </div>
           </div>

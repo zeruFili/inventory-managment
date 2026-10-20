@@ -15,16 +15,35 @@ export interface User {
   branch: string;
 }
 
-export type MaterialCondition = "New" | "Excellent" | "Good" | "Fair" | "Damaged" | "Decommissioned";
+export type MaterialCondition = "New" | "Excellent" | "Good" | "Fair" | "Damaged" | "Beyond Repair" | "Decommissioned";
 export type MaterialOperationalStatus = "Available" | "Rented" | "Reserved" | "Inspection Hold" | "Under Repair" | "Retired";
 
 export interface IndividuallyTrackedItem {
+  id?: string;
   serialNumber: string;
   barcode: string;
+  unitTag?: string;
   condition: MaterialCondition;
   operationalStatus: MaterialOperationalStatus;
   currentLocation: string;
+  currentRentalId?: string;
+  currentCustomerName?: string;
+  rentalCount?: number;
+  lastRentedDate?: string;
+  lastInspectionDate?: string;
+  acquisitionDate?: string;
   notes?: string;
+}
+
+export interface PriceHistoryRecord {
+  id?: string;
+  effectiveDate: string;
+  oldPriceDaily: number;
+  newPriceDaily: number;
+  oldPriceWeekly: number;
+  newPriceWeekly: number;
+  changedBy: string;
+  reason?: string;
 }
 
 export interface Material {
@@ -58,6 +77,7 @@ export interface Material {
   sellingPrice: number;
   rentalPriceDaily: number;
   rentalPriceWeekly: number;
+  priceHistory?: PriceHistoryRecord[];
   replacementValue: number;
   minimumStock: number;
   lowStockThreshold: number;
@@ -285,7 +305,7 @@ export interface SalesOrder {
 export interface Invoice {
   id: string;
   invoiceNumber: string;
-  relatedType: "Rental" | "Sales";
+  relatedType: "Rental" | "Sales" | "Billing" | "Maintenance" | "Damage Assessment" | string;
   relatedReference: string;
   customerId: string;
   customerName: string;
@@ -300,6 +320,14 @@ export interface Invoice {
   amountPaid: number;
   outstandingBalance: number;
   paymentStatus: PaymentStatus;
+  items?: {
+    materialId: string;
+    materialName: string;
+    quantity: number;
+    unitPrice: number;
+    lineTotal: number;
+  }[];
+  notes?: string;
   payments: {
     paymentId: string;
     amount: number;
@@ -330,6 +358,12 @@ export interface SecurityDepositRecord {
   status: DepositStatus;
   receivedDate: string;
   deductionsExplanation?: string;
+  deductedItems?: {
+    materialId: string;
+    materialName: string;
+    quantity: number;
+    amount: number;
+  }[];
 }
 
 export interface DamageReport {

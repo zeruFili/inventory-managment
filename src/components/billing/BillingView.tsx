@@ -5,11 +5,14 @@ import Icon from "../common/Icons";
 import Badge from "../common/Badge";
 import PaymentModal from "./PaymentModal";
 import VerbalAgreementModal from "./VerbalAgreementModal";
+import CreateInvoiceModal from "./CreateInvoiceModal";
+import MaterialSelectorSection, { SelectedItemLine } from "../common/MaterialSelectorSection";
 
 export const BillingView: React.FC = () => {
   const {
     invoices,
     securityDeposits,
+    materials,
     recordDepositDeduction,
     recordDepositRefund,
     can,
@@ -19,6 +22,7 @@ export const BillingView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("All Invoices");
   const [search, setSearch] = useState("");
 
+  const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
   const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null);
   const [verbalInvoice, setVerbalInvoice] = useState<Invoice | null>(null);
 
@@ -29,6 +33,7 @@ export const BillingView: React.FC = () => {
   } | null>(null);
   const [depositActionAmount, setDepositActionAmount] = useState<number>(100);
   const [depositActionNote, setDepositActionNote] = useState<string>("");
+  const [depositDamageLines, setDepositDamageLines] = useState<SelectedItemLine[]>([]);
 
   const totalReceivables = invoices.reduce((acc, i) => acc + i.outstandingBalance, 0);
   const totalCollected = invoices.reduce((acc, i) => acc + i.amountPaid, 0);
@@ -57,11 +62,28 @@ export const BillingView: React.FC = () => {
     if (!depositModal) return;
 
     if (depositModal.action === "deduct") {
-      recordDepositDeduction(depositModal.deposit.id, Number(depositActionAmount), depositActionNote || "Damage assessment deduction");
+      const deductedItems = depositDamageLines.map((line) => {
+        const mat = materials.find((m) => m.id === line.materialId);
+        const unitVal = mat ? (mat.replacementValue || mat.purchaseCost) : 0;
+        return {
+          materialId: line.materialId,
+          materialName: mat ? mat.name : "Material Item",
+          quantity: line.quantity,
+          amount: unitVal * line.quantity,
+        };
+      });
+
+      recordDepositDeduction(
+        depositModal.deposit.id,
+        Number(depositActionAmount),
+        depositActionNote || "Damage assessment deduction",
+        deductedItems.length > 0 ? deductedItems : undefined
+      );
     } else {
       recordDepositRefund(depositModal.deposit.id, Number(depositActionAmount));
     }
     setDepositModal(null);
+    setDepositDamageLines([]);
   };
 
   return (
@@ -79,6 +101,16 @@ export const BillingView: React.FC = () => {
             Manage multi-payment receivables, isolate security deposit liabilities, and record authorized verbal agreements.
           </p>
         </div>
+
+        {can("manage_billing") && (
+          <button
+            onClick={() => setIsCreateInvoiceOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-emerald-950 hover:bg-emerald-900 rounded-xl transition-all shadow-xs shrink-0 self-start sm:self-auto"
+          >
+            <Icon name="plus" size={14} />
+            <span>New Invoice</span>
+          </button>
+        )}
       </div>
 
       {/* KPI Ribbon */}
@@ -361,17 +393,66 @@ export const BillingView: React.FC = () => {
       {/* Deposit Action Modal */}
       {depositModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/40 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-amber-50 to-white">
-              <h3 className="text-base font-bold text-gray-900 font-display">
-                {depositModal.action === "deduct" ? "Deduct Damage Fee from Deposit" : "Refund Security Deposit"}
-              </h3>
-              <button onClick={() => setDepositModal(null)} className="p-1 text-gray-400 hover:text-gray-700">
+          <div
+            className={`w-full ${
+              depositModal.action === "deduct" ? "max-w-2xl" : "max-w-md"
+            } bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden max-h-[90vh] flex flex-col`}
+          >
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-amber-50 to-white shrink-0">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 font-display">
+                  {depositModal.action === "deduct" ? "Deduct Damage Fee from Deposit" : "Refund Security Deposit"}
+                </h3>
+                <span className="text-xs text-gray-500 block">
+                  Rental Ref: {depositModal.deposit.rentalReference} · {depositModal.deposit.customerName}
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  setDepositModal(null);
+                  setDepositDamageLines([]);
+                }}
+                className="p-1 text-gray-400 hover:text-gray-700"
+              >
                 <Icon name="close" size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleDepositActionSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleDepositActionSubmit} className="p-6 space-y-4 overflow-y-auto">
+              {/* If deducting damage, display reusable MaterialSelectorSection */}
+              {depositModal.action === "deduct" && (
+                <div className="pb-2">
+                  <MaterialSelectorSection
+                    mode="billing"
+                    title="Damaged Equipment & Materials"
+                    subtitle="Select damaged returned gear to evaluate deduction cost based on catalog replacement values"
+                    addButtonLabel="Add Damaged Material"
+                    items={depositDamageLines}
+                    onItemsChange={(newLines) => {
+                      setDepositDamageLines(newLines);
+                      const damageSum = newLines.reduce((acc, line) => {
+                        const mat = materials.find((m) => m.id === line.materialId);
+                        const val = mat ? (mat.replacementValue || mat.purchaseCost) : 0;
+                        return acc + val * line.quantity;
+                      }, 0);
+                      if (damageSum > 0) {
+                        setDepositActionAmount(
+                          Math.min(depositModal.deposit.remainingLiability, damageSum)
+                        );
+                        const names = newLines
+                          .map((l) => {
+                            const mat = materials.find((m) => m.id === l.materialId);
+                            return mat ? `${mat.name} (x${l.quantity})` : "";
+                          })
+                          .filter(Boolean)
+                          .join(", ");
+                        setDepositActionNote(`Damage deduction for: ${names}`);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                   {depositModal.action === "deduct" ? "Deduction Amount ($)" : "Refund Amount ($)"}
@@ -411,7 +492,10 @@ export const BillingView: React.FC = () => {
               <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setDepositModal(null)}
+                  onClick={() => {
+                    setDepositModal(null);
+                    setDepositDamageLines([]);
+                  }}
                   className="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-lg"
                 >
                   Cancel
@@ -429,6 +513,12 @@ export const BillingView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Create Invoice Modal */}
+      <CreateInvoiceModal
+        isOpen={isCreateInvoiceOpen}
+        onClose={() => setIsCreateInvoiceOpen(false)}
+      />
     </div>
   );
 };

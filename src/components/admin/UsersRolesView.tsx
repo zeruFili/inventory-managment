@@ -7,14 +7,14 @@ import Badge from "../common/Badge";
 export const UsersRolesView: React.FC = () => {
   const { users, currentUser, switchUserRole } = useApp();
 
-  const roleDefinitions: {
+  const roleDefinitions: Array<{
     role: UserRole;
     title: string;
     description: string;
     accessScope: string[];
     restrictions: string[];
     tone: "green" | "lime" | "yellow" | "blue" | "purple" | "gray";
-  } = [
+  }> = [
     {
       role: "admin",
       title: "Administrator",
@@ -38,22 +38,6 @@ export const UsersRolesView: React.FC = () => {
       accessScope: ["Create & Edit Materials", "Record Receipts & Transfers", "Conduct Check-in Inspections", "Manage Maintenance Queue"],
       restrictions: ["Restricted from modifying selling prices, invoices, or customer credit terms"],
       tone: "lime",
-    },
-    {
-      role: "driver",
-      title: "Internal Fleet Driver",
-      description: "Mobile-friendly active route portal, destination maps, customer contact, cargo manifests, and proof of delivery capture.",
-      accessScope: ["View Assigned Route Dispatches", "Customer Delivery Instructions", "Update Transport Status", "Record Proof of Delivery & Signatures"],
-      restrictions: ["STRICTLY HIDDEN: Inventory valuation, purchase costs, invoicing, customer financials"],
-      tone: "blue",
-    },
-    {
-      role: "courier",
-      title: "Courier Partner",
-      description: "Third-party courier parcel logistics, pickup/drop-off instructions, and parcel handover confirmation.",
-      accessScope: ["Assigned Courier Tasks", "Delivery Notes & Packages", "Submit Handover Acknowledgements"],
-      restrictions: ["STRICTLY HIDDEN: All internal financial metrics, pricing, invoices, and other clients"],
-      tone: "gray",
     },
     {
       role: "accountant",
@@ -175,7 +159,7 @@ export const UsersRolesView: React.FC = () => {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-            Active Team User Accounts ({users.length})
+            Active Team User Accounts ({users.filter((u) => u.role !== "driver" && u.role !== "courier").length})
           </h2>
           <span className="text-xs text-gray-500">Managed via Admin Console</span>
         </div>
@@ -193,7 +177,9 @@ export const UsersRolesView: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {users.map((u) => (
+              {users
+                .filter((u) => u.role !== "driver" && u.role !== "courier")
+                .map((u) => (
                 <tr key={u.id} className="hover:bg-emerald-50/20 transition-colors">
                   <td className="py-3 px-4 flex items-center gap-3">
                     <span className="w-8 h-8 rounded-full bg-emerald-900 text-white font-bold flex items-center justify-center text-xs">

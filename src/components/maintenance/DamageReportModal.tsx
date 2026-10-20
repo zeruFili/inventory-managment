@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useApp } from "../../context/AppContext";
 import Modal from "../common/Modal";
+import MaterialSelectorSection from "../common/MaterialSelectorSection";
 
 interface DamageReportModalProps {
   isOpen: boolean;
@@ -61,25 +62,26 @@ export const DamageReportModal: React.FC<DamageReportModalProps> = ({
       title="File Damage Incident Report"
       subtitle="Document damaged gear, responsibility determination, and repair cost estimation"
       badge="DAMAGE CLAIMS"
-      maxWidth="xl"
+      maxWidth="2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Damaged Material *</label>
-            <select
-              value={materialId}
-              onChange={(e) => setMaterialId(e.target.value)}
-              className="w-full text-xs font-medium border border-gray-300 rounded-lg p-2.5 bg-white text-gray-900 outline-none"
-            >
-              {materials.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name} ({m.code})
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Reusable Damaged Material Selector */}
+        <MaterialSelectorSection
+          mode="maintenance"
+          singleSelection
+          selectedMaterialId={materialId}
+          onSelectMaterial={(mat) => {
+            setMaterialId(mat.id);
+            const val = mat.replacementValue || mat.purchaseCost;
+            setEstimatedRepairCost(Math.round(val * 0.4));
+            setProposedCustomerCharge(Math.round(val * 0.35));
+          }}
+          title="Damaged Material *"
+          subtitle="Select the damaged equipment unit for this incident report"
+          addButtonLabel="Select Material"
+        />
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Related Rental Ref</label>
             <select
@@ -97,6 +99,16 @@ export const DamageReportModal: React.FC<DamageReportModalProps> = ({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Customer / Account</label>
+            <input
+              type="text"
+              readOnly
+              value={rentals.find((r) => r.id === rentalReference)?.customerName || "Selected Customer"}
+              className="w-full text-xs font-medium border border-gray-200 bg-gray-100 rounded-lg p-2.5 text-gray-700 outline-none"
+            />
           </div>
         </div>
 

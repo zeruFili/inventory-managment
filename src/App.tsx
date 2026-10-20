@@ -6,15 +6,13 @@ import Toast from "./components/common/Toast";
 import DashboardView from "./components/dashboard/DashboardView";
 import InventoryView from "./components/inventory/InventoryView";
 import RentalsView from "./components/rentals/RentalsView";
-import CustomersSuppliersView from "./components/customers/CustomersSuppliersView";
-import LogisticsView from "./components/logistics/LogisticsView";
+import CustomersView from "./components/customers/CustomersView";
+import SuppliersView from "./components/customers/SuppliersView";
 import SalesView from "./components/sales/SalesView";
 import BillingView from "./components/billing/BillingView";
 import MaintenanceView from "./components/maintenance/MaintenanceView";
 import ReportsView from "./components/dashboard/ReportsView";
 import UsersRolesView from "./components/admin/UsersRolesView";
-import AuditLogView from "./components/admin/AuditLogView";
-import SettingsView from "./components/admin/SettingsView";
 import MaterialModal from "./components/inventory/MaterialModal";
 import RentalReservationModal from "./components/rentals/RentalReservationModal";
 
@@ -52,9 +50,9 @@ function AppContent() {
 
           {activeModule === "Rentals" && <RentalsView />}
 
-          {activeModule === "Customers" && <CustomersSuppliersView />}
+          {activeModule === "Customers" && <CustomersView />}
 
-          {activeModule === "Logistics" && <LogisticsView />}
+          {activeModule === "Suppliers" && <SuppliersView />}
 
           {activeModule === "Sales" && <SalesView />}
 
@@ -65,10 +63,6 @@ function AppContent() {
           {activeModule === "Reports" && <ReportsView />}
 
           {activeModule === "Users" && <UsersRolesView />}
-
-          {activeModule === "Audit" && <AuditLogView />}
-
-          {activeModule === "Settings" && <SettingsView />}
         </main>
       </div>
 

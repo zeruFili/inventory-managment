@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useApp } from "../../context/AppContext";
 import Modal from "../common/Modal";
 import Icon from "../common/Icons";
+import MaterialSelectorSection from "../common/MaterialSelectorSection";
 
 interface SalesOrderModalProps {
   isOpen: boolean;
@@ -96,7 +97,7 @@ export const SalesOrderModal: React.FC<SalesOrderModalProps> = ({
       title="Create Direct Sales Order / Quotation"
       subtitle="Sale of materials, consumables, or decommissioned fleet inventory"
       badge="SALES MANAGEMENT"
-      maxWidth="2xl"
+      maxWidth="4xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -129,65 +130,15 @@ export const SalesOrderModal: React.FC<SalesOrderModalProps> = ({
           </div>
         </div>
 
-        {/* Product Lines */}
-        <div className="space-y-2 pt-2 border-t border-gray-100">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-gray-700 uppercase">Products & Quantities</label>
-            <button
-              type="button"
-              onClick={handleAddLine}
-              className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 hover:text-emerald-950"
-            >
-              <Icon name="plus" size={13} /> Add Product
-            </button>
-          </div>
-
-          <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-            {salesItems.map((line, idx) => (
-              <div key={idx} className="p-2.5 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-between gap-3 text-xs">
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
-                  <div className="sm:col-span-7">
-                    <select
-                      value={line.materialId}
-                      onChange={(e) => handleUpdateLine(idx, e.target.value, line.quantity)}
-                      className="w-full text-xs font-medium border border-gray-300 rounded-lg p-2 bg-white text-gray-900 outline-none"
-                    >
-                      {materials.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} (${m.sellingPrice} sell / cost: ${m.purchaseCost})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="sm:col-span-5 flex items-center gap-2">
-                    <span className="text-[10px] text-gray-500 font-bold uppercase">Qty:</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={line.quantity}
-                      onChange={(e) => handleUpdateLine(idx, line.materialId, Number(e.target.value))}
-                      className="w-16 text-xs font-bold border border-gray-300 rounded-lg p-1.5 text-center bg-white text-gray-900 outline-none"
-                    />
-                    <span className="text-xs font-bold text-gray-900 font-display min-w-[70px] text-right">
-                      ${line.lineTotal}
-                    </span>
-                  </div>
-                </div>
-
-                {salesItems.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveLine(idx)}
-                    className="text-gray-400 hover:text-rose-600 p-1"
-                  >
-                    <Icon name="close" size={14} />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Reusable Product Selection Section */}
+        <MaterialSelectorSection
+          mode="sales"
+          title="Products & Equipment for Sale"
+          subtitle="Select on-hand inventory items, consumables, or fleet gear"
+          addButtonLabel="Add Product"
+          items={lines}
+          onItemsChange={setLines}
+        />
 
         {/* Payment & Profit Summary */}
         <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">

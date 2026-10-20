@@ -23,8 +23,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeModule, onNavigate }) =>
         { id: "Dashboard", label: "Dashboard", icon: "grid" },
         { id: "Inventory", label: "Inventory & Stock", icon: "box", badge: lowStockCount > 0 ? lowStockCount : undefined },
         { id: "Rentals", label: "Rentals & Calendar", icon: "calendar", badge: overdueCount > 0 ? overdueCount : undefined },
-        { id: "Customers", label: "Customers & Suppliers", icon: "users" },
-        { id: "Logistics", label: "Logistics & Drivers", icon: "truck" },
+        { id: "Customers", label: "Customers", icon: "users" },
+        { id: "Suppliers", label: "Suppliers", icon: "package" },
       ],
     },
     {
@@ -40,8 +40,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeModule, onNavigate }) =>
       label: "ADMINISTRATION",
       items: [
         { id: "Users", label: "Users & Roles", icon: "shield" },
-        { id: "Audit", label: "Audit Trail", icon: "fileText" },
-        { id: "Settings", label: "System Settings", icon: "settings" },
       ],
     },
   ];

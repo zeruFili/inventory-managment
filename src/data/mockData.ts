@@ -1,5 +1,6 @@
 import {
   Material,
+  StockMovement,
   Customer,
   Supplier,
   RentalReservation,

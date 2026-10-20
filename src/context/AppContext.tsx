@@ -17,6 +17,7 @@ import {
   RentalStatus,
   DeliveryStatus,
   MaterialCondition,
+  IndividuallyTrackedItem,
 } from "../types";
 import {
   initialMaterials,
@@ -75,6 +76,11 @@ interface AppContextType {
   addMaterial: (material: Omit<Material, "id" | "createdAt" | "createdBy" | "modifiedAt" | "modifiedBy">) => void;
   updateMaterial: (id: string, updates: Partial<Material>) => void;
   archiveMaterial: (id: string) => void;
+  updateIndividualItem: (
+    materialId: string,
+    serialNumber: string,
+    updates: Partial<IndividuallyTrackedItem>
+  ) => void;
   recordStockMovement: (
     materialId: string,
     movementType: StockMovement["movementType"],
@@ -126,9 +132,15 @@ interface AppContextType {
   fulfillSalesOrder: (orderId: string) => void;
 
   // Billing & Payments
+  createInvoice: (invoice: Omit<Invoice, "id" | "invoiceNumber">) => void;
   recordInvoicePayment: (invoiceId: string, amount: number, method: string, reference: string) => void;
   recordVerbalAgreement: (invoiceId: string, agreedTerms: string, promisedDate: string, notes: string) => void;
-  recordDepositDeduction: (depositId: string, deductionAmount: number, explanation: string) => void;
+  recordDepositDeduction: (
+    depositId: string,
+    deductionAmount: number,
+    explanation: string,
+    deductedItems?: { materialId: string; materialName: string; quantity: number; amount: number }[]
+  ) => void;
   recordDepositRefund: (depositId: string, refundAmount: number) => void;
 
   // Maintenance & Damage
@@ -332,6 +344,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
     logAudit("ARCHIVE_MATERIAL", "Inventory", id, `Archived material: ${mat.name}. Historical transactions preserved.`);
     showToast(`Material "${mat.name}" archived.`);
+  };
+
+  // Update Individual Item Details (Condition, Status, Location)
+  const updateIndividualItem = (
+    materialId: string,
+    serialNumber: string,
+    updates: Partial<IndividuallyTrackedItem>
+  ) => {
+    setMaterials((prev) =>
+      prev.map((m) => {
+        if (m.id === materialId) {
+          const currentItems = m.trackedItems || [];
+          const updatedItems = currentItems.map((item) =>
+            item.serialNumber === serialNumber ? { ...item, ...updates } : item
+          );
+          return {
+            ...m,
+            trackedItems: updatedItems,
+            modifiedAt: new Date().toISOString().replace("T", " ").slice(0, 16),
+            modifiedBy: currentUser.name,
+          };
+        }
+        return m;
+      })
+    );
+    logAudit(
+      "UPDATE_INDIVIDUAL_ITEM",
+      "Inventory",
+      materialId,
+      `Updated individual unit ${serialNumber}`
+    );
+    showToast(`Updated item ${serialNumber}.`);
   };
 
   // Stock Movement
@@ -883,6 +927,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // Invoices & Payments
+  const createInvoice = (invoiceData: Omit<Invoice, "id" | "invoiceNumber">) => {
+    const nextNum = 4120 + invoices.length;
+    const newId = `INV-${nextNum}`;
+    const invNum = `INV-2025-${nextNum.toString()}`;
+    const newInv: Invoice = {
+      ...invoiceData,
+      id: newId,
+      invoiceNumber: invNum,
+    };
+    setInvoices((prev) => [newInv, ...prev]);
+    logAudit(
+      "CREATE_INVOICE",
+      "Billing",
+      newId,
+      `Created invoice ${invNum} for ${invoiceData.customerName} ($${invoiceData.totalAmount})`
+    );
+    showToast(`Invoice ${invNum} created.`);
+  };
+
   const recordInvoicePayment = (invoiceId: string, amount: number, method: string, reference: string) => {
     setInvoices((prev) =>
       prev.map((inv) => {
@@ -937,7 +1000,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     showToast("Verbal agreement recorded with management pending review flag.");
   };
 
-  const recordDepositDeduction = (depositId: string, deductionAmount: number, explanation: string) => {
+  const recordDepositDeduction = (
+    depositId: string,
+    deductionAmount: number,
+    explanation: string,
+    deductedItems?: { materialId: string; materialName: string; quantity: number; amount: number }[]
+  ) => {
     setSecurityDeposits((prev) =>
       prev.map((d) =>
         d.id === depositId
@@ -947,6 +1015,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
               remainingLiability: Math.max(0, d.remainingLiability - deductionAmount),
               status: d.remainingLiability - deductionAmount === 0 ? "Deducted" : "Partially Deducted",
               deductionsExplanation: explanation,
+              deductedItems: deductedItems || d.deductedItems,
             }
           : d
       )
@@ -1096,6 +1165,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       addMaterial,
       updateMaterial,
       archiveMaterial,
+      updateIndividualItem,
       recordStockMovement,
       checkMaterialAvailability,
       addCustomer,
@@ -1111,6 +1181,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       updateDeliveryTaskStatus,
       createSalesOrder,
       fulfillSalesOrder,
+      createInvoice,
       recordInvoicePayment,
       recordVerbalAgreement,
       recordDepositDeduction,

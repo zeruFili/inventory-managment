@@ -28,8 +28,6 @@ export const Topbar: React.FC<TopbarProps> = ({ onSearch, onOpenNewRental }) => 
     { role: "admin", label: "Administrator", desc: "Full system control & configuration" },
     { role: "general_management", label: "General Management (CEO)", desc: "Executive P&L & approvals" },
     { role: "stock_manager", label: "Stock Manager", desc: "Catalog, counts & check-ins" },
-    { role: "driver", label: "Driver", desc: "Routes & proof of delivery (Protected)" },
-    { role: "courier", label: "Courier", desc: "Parcel logistics & handover" },
     { role: "accountant", label: "Accountant", desc: "Invoicing, receivables & deposits" },
   ];
 
