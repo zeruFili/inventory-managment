@@ -72,11 +72,11 @@ export const BackToInventoryModal: React.FC<BackToInventoryModalProps> = ({
         {/* If Rental Order: List all materials being restocked */}
         {rentalOrder ? (
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
               <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                 Materials Returning to Inventory ({rentalOrder.items.length} items · {totalItemsCount} units)
               </span>
-              <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-bold">
+              <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-bold self-start sm:self-auto">
                 {rentalOrder.reservationNumber}
               </span>
             </div>

@@ -150,7 +150,7 @@ export const EditDepositModal: React.FC<EditDepositModalProps> = ({
 
         {/* Financial Breakdown & Status */}
         <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-200/60 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <span className="text-[11px] font-bold uppercase text-amber-900 tracking-wider">
               Escrow Liability Calculation
             </span>

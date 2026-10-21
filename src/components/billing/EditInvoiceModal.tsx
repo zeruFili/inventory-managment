@@ -244,7 +244,7 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
         </div>
 
         {/* Buttons */}
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+        <div className="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-gray-100">
           <button
             type="button"
             onClick={onClose}

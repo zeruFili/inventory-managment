@@ -222,7 +222,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
           />
         </div>
 
-        <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
+        <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}

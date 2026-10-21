@@ -594,7 +594,7 @@ export const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
        
 
         {/* Actions */}
-        <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
+        <div className="pt-4 border-t border-gray-100 flex flex-wrap items-center justify-end gap-3">
           <button
             type="button"
             onClick={handleClose}

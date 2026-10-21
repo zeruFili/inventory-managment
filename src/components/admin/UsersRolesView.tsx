@@ -124,7 +124,7 @@ export const UsersRolesView: React.FC = () => {
 
       {/* Role Cards Grid */}
       <div>
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
           <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
             Configured System Roles & Permissions ({roleDefinitions.length})
           </h2>
@@ -294,7 +294,7 @@ export const UsersRolesView: React.FC = () => {
               </button>
             </div>
           ) : (
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[850px]">
               <thead className="bg-gray-50/80 border-b border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                 <tr>
                   <th className="py-3 px-4">User & Role Profile</th>
@@ -476,7 +476,7 @@ export const UsersRolesView: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
                   Email Address
@@ -537,19 +537,19 @@ export const UsersRolesView: React.FC = () => {
               </div>
             )}
 
-            <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+            <div className="pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
               <button
                 onClick={() => {
                   assumeUser(selectedUserDetails.id);
                   setSelectedUserDetails(null);
                 }}
-                className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer text-center"
               >
                 Assume This User Persona
               </button>
               <button
                 onClick={() => setSelectedUserDetails(null)}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs rounded-xl transition-colors cursor-pointer text-center"
               >
                 Close
               </button>

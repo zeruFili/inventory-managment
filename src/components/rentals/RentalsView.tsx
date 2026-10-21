@@ -142,7 +142,7 @@ export const RentalsView: React.FC = () => {
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[850px]">
               <thead className="bg-gray-50/80 border-b border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Reservation #</th>
@@ -321,7 +321,7 @@ export const RentalsView: React.FC = () => {
                   {selectedRentalForDetail.status}
                 </Badge>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-gray-600">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-600">
                 <div>Start: <strong>{selectedRentalForDetail.startDate.replace("T", " ")}</strong></div>
                 <div>Expected Return: <strong>{selectedRentalForDetail.expectedReturnDate.replace("T", " ")}</strong></div>
                 <div>Responsible Officer: <strong>{selectedRentalForDetail.responsibleEmployee}</strong></div>
@@ -334,7 +334,7 @@ export const RentalsView: React.FC = () => {
               <h3 className="font-bold text-gray-900 uppercase tracking-wider mb-2">Reserved Materials List</h3>
               <div className="divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden bg-white">
                 {selectedRentalForDetail.items.map((item, idx) => (
-                  <div key={idx} className="p-3 flex items-center justify-between">
+                  <div key={idx} className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <div>
                       <strong className="text-gray-900 block font-bold">{item.materialName}</strong>
                       <span className="text-[10px] text-gray-400 font-mono">{item.materialCode} · {item.category}</span>

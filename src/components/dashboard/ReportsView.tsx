@@ -57,7 +57,7 @@ export const ReportsView: React.FC = () => {
       </div>
 
       {/* KPI Ribbon */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Combined Revenue"
           value={`$${(totalRentalIncome + totalSalesIncome).toLocaleString()}`}
@@ -149,7 +149,7 @@ export const ReportsView: React.FC = () => {
         {reportType === "financial" && (
           <div className="space-y-4">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[720px]">
                 <thead className="bg-gray-50 text-[10px] uppercase font-bold text-gray-500 border-b border-gray-200">
                   <tr>
                     <th className="py-2.5 px-3">Revenue Stream</th>
@@ -201,7 +201,7 @@ export const ReportsView: React.FC = () => {
 
         {reportType === "inventory" && (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[720px]">
               <thead className="bg-gray-50 text-[10px] uppercase font-bold text-gray-500 border-b border-gray-200">
                 <tr>
                   <th className="py-2.5 px-3">Category</th>
@@ -239,7 +239,7 @@ export const ReportsView: React.FC = () => {
             <p className="text-xs text-gray-600">
               Audited incident claims, responsibility classifications, and recovery ratios from security deposit deductions.
             </p>
-            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-3 gap-4 text-center">
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-center">
               <div>
                 <span className="text-[10px] text-gray-400 font-bold uppercase block">TOTAL DAMAGE ASSESSED</span>
                 <strong className="text-xl font-bold text-rose-700 font-display mt-1 block">$1,450</strong>

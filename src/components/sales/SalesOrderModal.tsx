@@ -141,7 +141,7 @@ export const SalesOrderModal: React.FC<SalesOrderModalProps> = ({
         />
 
         {/* Payment & Profit Summary */}
-        <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+        <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
           <div>
             <span className="text-[10px] text-gray-500 uppercase font-bold block">Payment Method</span>
             <select
@@ -194,7 +194,7 @@ export const SalesOrderModal: React.FC<SalesOrderModalProps> = ({
           />
         </div>
 
-        <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
+        <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}

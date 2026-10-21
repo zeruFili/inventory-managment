@@ -75,7 +75,7 @@ export const CustomersView: React.FC = () => {
       </div>
 
       {/* KPI Stats Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">
             Total Customers
@@ -196,7 +196,7 @@ export const CustomersView: React.FC = () => {
       {viewMode === "table" ? (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[800px]">
               <thead className="bg-gray-50/80 border-b border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Customer Name</th>

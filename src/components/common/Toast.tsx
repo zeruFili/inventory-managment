@@ -34,11 +34,11 @@ export const Toast: React.FC<ToastProps> = ({ toast }) => {
   const config = typeConfig[toast.type];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border transition-all animate-bounce-subtle text-xs font-semibold backdrop-blur-md max-w-md">
-      <div className={`p-1 rounded-full ${config.iconColor}`}>
+    <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 flex items-center gap-2.5 sm:gap-3 p-2.5 sm:px-4 sm:py-3 rounded-2xl shadow-2xl border transition-all animate-bounce-subtle text-xs font-semibold backdrop-blur-md max-w-md">
+      <div className={`p-1 rounded-full shrink-0 ${config.iconColor}`}>
         <Icon name={config.icon} size={15} />
       </div>
-      <span className="text-gray-900 bg-white px-3 py-1.5 rounded-xl border border-gray-200 shadow-md">
+      <span className="text-gray-900 bg-white px-3 py-1.5 rounded-xl border border-gray-200 shadow-md flex-1 min-w-0 break-words">
         {toast.message}
       </span>
     </div>

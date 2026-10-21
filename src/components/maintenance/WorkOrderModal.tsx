@@ -150,7 +150,7 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
           <div>
             <label className="block text-[10px] font-bold text-gray-600 uppercase mb-1">Spare Parts Cost ($)</label>
             <input

@@ -71,7 +71,7 @@ export const CustomerProfileDrawer: React.FC<CustomerProfileDrawerProps> = ({
 
         {/* 360 Tabs */}
         <div>
-          <div className="flex items-center gap-1 border-b border-gray-200 pb-2">
+          <div className="flex items-center gap-1 border-b border-gray-200 pb-2 overflow-x-auto flex-nowrap">
             {[
               { id: "rentals", label: `Rentals (${customerRentals.length})` },
               { id: "sales", label: `Sales Orders (${customerSales.length})` },
@@ -81,7 +81,7 @@ export const CustomerProfileDrawer: React.FC<CustomerProfileDrawerProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-1.5 font-bold rounded-lg transition-all ${
+                className={`px-3 py-1.5 font-bold rounded-lg transition-all whitespace-nowrap shrink-0 ${
                   activeTab === tab.id
                     ? "bg-emerald-950 text-white shadow-xs"
                     : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"

@@ -62,7 +62,7 @@ export const SettingsView: React.FC = () => {
 
           <div className="space-y-3">
             {warehouses.map((wh) => (
-              <div key={wh.id} className="p-3 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-between">
+              <div key={wh.id} className="p-3 bg-gray-50 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <strong className="text-xs font-bold text-gray-900 block">{wh.name}</strong>
                   <span className="text-[11px] text-gray-500">{wh.location}</span>

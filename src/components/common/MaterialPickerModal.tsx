@@ -501,7 +501,7 @@ export const MaterialPickerModal: React.FC<MaterialPickerModalProps> = ({
           {viewMode === "table" ? (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs min-w-[750px]">
                   <thead className="bg-gray-50/80 border-b border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                     <tr>
                       <th className="py-3 px-4">Material & SKU</th>

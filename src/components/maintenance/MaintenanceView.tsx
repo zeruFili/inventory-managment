@@ -63,7 +63,7 @@ export const MaintenanceView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {can("manage_maintenance") && (
             <>
               <button
@@ -89,7 +89,7 @@ export const MaintenanceView: React.FC = () => {
       </div>
 
       {/* KPI Ribbon */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 bg-white rounded-2xl border border-gray-200 shadow-2xs">
           <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
             ITEMS UNDER REPAIR
@@ -135,7 +135,7 @@ export const MaintenanceView: React.FC = () => {
 
       {/* Tabs Switcher */}
       <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs space-y-4">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveTab("orders")}
             className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${
@@ -170,7 +170,7 @@ export const MaintenanceView: React.FC = () => {
       {activeTab === "orders" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[850px]">
               <thead className="bg-gray-50/80 border-b border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Work Order #</th>
@@ -411,7 +411,7 @@ export const MaintenanceView: React.FC = () => {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[750px]">
                 <thead className="bg-gray-50/80 border-b border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                   <tr>
                     <th className="py-3 px-4">Order / Reservation #</th>

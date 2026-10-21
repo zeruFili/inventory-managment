@@ -105,7 +105,7 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
               <h2 className="text-base font-bold text-gray-900 font-display mt-0.5">
                 {material.name}
               </h2>
-              <div className="flex items-center gap-3 text-xs text-gray-600 mt-1">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-600 mt-1">
                 <span>Warehouse: <strong>{material.warehouse}</strong> ({material.storageLocation})</span>
                 <span>•</span>
                 <span>Daily Rate: <strong>${material.rentalPriceDaily}/day</strong></span>
@@ -236,7 +236,7 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
                 <span className="text-[10px] text-rose-700 block mt-0.5">Workshop servicing</span>
               </div>
 
-              <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200 shadow-2xs">
+              <div className="bg-gray-50 p-3.5 rounded-xl border border-gray-200 shadow-2xs col-span-2 sm:col-span-1">
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
                   Inspection / Retired
                 </span>
@@ -289,7 +289,7 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-6 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
                 <div className="p-3 bg-emerald-50/40 rounded-xl border border-emerald-200 text-center">
                   <span className="text-[10px] font-bold text-emerald-800 uppercase block">New</span>
                   <strong className="text-lg font-bold text-emerald-950 font-display">
@@ -424,7 +424,7 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
+                <table className="w-full text-left border-collapse text-xs min-w-[600px]">
                   <thead>
                     <tr className="bg-gray-50/50 border-b border-gray-200 text-gray-500 font-bold uppercase text-[10px]">
                       <th className="py-2.5 px-3">Company Name</th>
@@ -501,7 +501,7 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full text-left border-collapse text-xs min-w-[600px]">
                     <thead>
                       <tr className="bg-gray-50/50 border-b border-gray-200 text-gray-500 font-bold uppercase text-[10px]">
                         <th className="py-2.5 px-3">Work Order #</th>
@@ -557,7 +557,7 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full text-left border-collapse text-xs min-w-[600px]">
                     <thead>
                       <tr className="bg-gray-50/50 border-b border-gray-200 text-gray-500 font-bold uppercase text-[10px]">
                         <th className="py-2.5 px-3">Report #</th>
@@ -671,7 +671,7 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
+                <table className="w-full text-left border-collapse text-xs min-w-[600px]">
                   <thead>
                     <tr className="bg-gray-50/50 border-b border-gray-200 text-gray-500 font-bold uppercase text-[10px]">
                       <th className="py-2.5 px-3">Effective Date</th>

@@ -85,7 +85,7 @@ export const RentalCalendar: React.FC<RentalCalendarProps> = ({ onSelectRental }
   const emptyStartDays = Array.from({ length: firstDayOfWeek }, (_, i) => i);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden space-y-4 p-5">
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden space-y-4 p-3.5 sm:p-5">
       {/* Calendar Header Controls */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
@@ -185,88 +185,90 @@ export const RentalCalendar: React.FC<RentalCalendarProps> = ({ onSelectRental }
 
       {/* Calendar Views */}
       {calendarView === "month" && (
-        <div>
-          {/* Day Headers */}
-          <div className="grid grid-cols-7 gap-px border-b border-gray-200 text-center text-[11px] font-bold text-gray-500 uppercase py-2 bg-gray-50/70 rounded-t-lg">
-            <span>Sun</span>
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
-          </div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[640px] md:min-w-0">
+            {/* Day Headers */}
+            <div className="grid grid-cols-7 gap-px border-b border-gray-200 text-center text-[11px] font-bold text-gray-500 uppercase py-2 bg-gray-50/70 rounded-t-lg">
+              <span>Sun</span>
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+            </div>
 
-          {/* Days Grid */}
-          <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-b-lg overflow-hidden border border-gray-200">
-            {emptyStartDays.map((i) => (
-              <div key={`empty-${i}`} className="bg-gray-50/40 min-h-24 p-2 text-gray-300" />
-            ))}
+            {/* Days Grid */}
+            <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-b-lg overflow-hidden border border-gray-200">
+              {emptyStartDays.map((i) => (
+                <div key={`empty-${i}`} className="bg-gray-50/40 min-h-24 p-2 text-gray-300" />
+              ))}
 
-            {daysArray.map((day) => {
-              const dateStr = `2025-06-${day.toString().padStart(2, "0")}`;
-              const dayRentals = filteredRentals.filter((r) => {
-                const s = r.startDate.slice(0, 10);
-                const e = r.expectedReturnDate.slice(0, 10);
-                return dateStr >= s && dateStr <= e;
-              });
+              {daysArray.map((day) => {
+                const dateStr = `2025-06-${day.toString().padStart(2, "0")}`;
+                const dayRentals = filteredRentals.filter((r) => {
+                  const s = r.startDate.slice(0, 10);
+                  const e = r.expectedReturnDate.slice(0, 10);
+                  return dateStr >= s && dateStr <= e;
+                });
 
-              const isToday = day === 18 && month === 5 && year === 2025;
+                const isToday = day === 18 && month === 5 && year === 2025;
 
-              return (
-                <div
-                  key={day}
-                  className={`bg-white min-h-24 p-1.5 flex flex-col justify-between transition-colors hover:bg-emerald-50/20 ${
-                    isToday ? "ring-2 ring-emerald-600 inset-0 z-10" : ""
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ${
-                        isToday ? "bg-emerald-950 text-white" : "text-gray-700"
-                      }`}
-                    >
-                      {day}
-                    </span>
-                    {dayRentals.length > 0 && (
-                      <span className="text-[10px] font-mono text-gray-400 font-semibold">
-                        {dayRentals.length} rent
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-1 mt-1">
-                    {dayRentals.slice(0, 2).map((r) => (
-                      <button
-                        key={r.id}
-                        onClick={() => onSelectRental(r)}
-                        className={`w-full text-left p-1 rounded-md text-[10px] font-bold line-clamp-1 border transition-all ${
-                          r.status === "Overdue"
-                            ? "bg-rose-50 text-rose-800 border-rose-200"
-                            : r.status === "Active"
-                            ? "bg-amber-50 text-amber-900 border-amber-200"
-                            : "bg-emerald-50 text-emerald-900 border-emerald-200"
+                return (
+                  <div
+                    key={day}
+                    className={`bg-white min-h-24 p-1.5 flex flex-col justify-between transition-colors hover:bg-emerald-50/20 ${
+                      isToday ? "ring-2 ring-emerald-600 inset-0 z-10" : ""
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ${
+                          isToday ? "bg-emerald-950 text-white" : "text-gray-700"
                         }`}
                       >
-                        {r.customerName.slice(0, 14)}.. ({r.items.length})
-                      </button>
-                    ))}
-                    {dayRentals.length > 2 && (
-                      <span className="text-[9px] text-gray-400 font-medium block text-center">
-                        +{dayRentals.length - 2} more
+                        {day}
                       </span>
-                    )}
+                      {dayRentals.length > 0 && (
+                        <span className="text-[10px] font-mono text-gray-400 font-semibold">
+                          {dayRentals.length} rent
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-1 mt-1">
+                      {dayRentals.slice(0, 2).map((r) => (
+                        <button
+                          key={r.id}
+                          onClick={() => onSelectRental(r)}
+                          className={`w-full text-left p-1 rounded-md text-[10px] font-bold line-clamp-1 border transition-all ${
+                            r.status === "Overdue"
+                              ? "bg-rose-50 text-rose-800 border-rose-200"
+                              : r.status === "Active"
+                              ? "bg-amber-50 text-amber-900 border-amber-200"
+                              : "bg-emerald-50 text-emerald-900 border-emerald-200"
+                          }`}
+                        >
+                          {r.customerName.slice(0, 14)}.. ({r.items.length})
+                        </button>
+                      ))}
+                      {dayRentals.length > 2 && (
+                        <span className="text-[9px] text-gray-400 font-medium block text-center">
+                          +{dayRentals.length - 2} more
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
 
       {calendarView === "week" && (
-        <div className="space-y-3">
-          <div className="grid grid-cols-7 gap-3">
+        <div className="space-y-3 overflow-x-auto">
+          <div className="min-w-[700px] md:min-w-0 grid grid-cols-7 gap-3">
             {[16, 17, 18, 19, 20, 21, 22].map((day) => {
               const dateStr = `2025-06-${day}`;
               const dayRentals = filteredRentals.filter((r) => {

@@ -222,7 +222,7 @@ export const IndividualUnitsView: React.FC<IndividualUnitsViewProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
+          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-start sm:justify-end">
             <button
               type="button"
               onClick={onBack}
@@ -244,7 +244,7 @@ export const IndividualUnitsView: React.FC<IndividualUnitsViewProps> = ({
         </div>
 
         {/* Aggregate KPI Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-5 pt-4 border-t border-gray-100">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-5 pt-4 border-t border-gray-100">
           <div className="bg-gray-50/70 p-3 rounded-xl border border-gray-100 text-center">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">
               Total Inventory
@@ -385,7 +385,7 @@ export const IndividualUnitsView: React.FC<IndividualUnitsViewProps> = ({
       {viewMode === "table" ? (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[850px]">
               <thead className="bg-gray-50/80 border-b border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Unit Tag & Serial #</th>

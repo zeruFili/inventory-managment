@@ -1,6 +1,7 @@
 import React from "react";
 
 export type IconName =
+  | "menu"
   | "grid"
   | "box"
   | "calendar"
@@ -42,6 +43,13 @@ export type IconName =
   | "trash";
 
 const iconMap: Record<IconName, React.ReactNode> = {
+  menu: (
+    <>
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </>
+  ),
   grid: (
     <>
       <rect x="3" y="3" width="7" height="7" rx="1" />

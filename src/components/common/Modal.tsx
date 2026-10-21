@@ -53,27 +53,27 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 ${zIndex} flex items-center justify-center p-4 bg-emerald-950/40 backdrop-blur-xs transition-opacity animate-fade-in`}
+      className={`fixed inset-0 ${zIndex} flex items-center justify-center p-2.5 sm:p-4 md:p-6 bg-emerald-950/45 backdrop-blur-xs transition-opacity animate-fade-in`}
       onClick={onClose}
     >
       <div
-        className={`w-full ${widthClasses[maxWidth]} bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all animate-scale-up max-h-[90vh] flex flex-col`}
+        className={`w-full ${widthClasses[maxWidth]} bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all animate-scale-up max-h-[94vh] sm:max-h-[90vh] flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between bg-gradient-to-r from-emerald-50/50 via-white to-amber-50/30">
-          <div>
+        <div className="p-4 sm:px-6 sm:py-5 border-b border-gray-100 flex items-start justify-between bg-gradient-to-r from-emerald-50/50 via-white to-amber-50/30 gap-3">
+          <div className="min-w-0 flex-1">
             {badge && (
-              <span className="text-[10px] font-bold tracking-wider text-emerald-800 uppercase bg-emerald-100/70 px-2 py-0.5 rounded-full inline-block mb-1.5">
+              <span className="text-[10px] font-bold tracking-wider text-emerald-800 uppercase bg-emerald-100/70 px-2 py-0.5 rounded-full inline-block mb-1.5 truncate">
                 {badge}
               </span>
             )}
-            <h2 className="text-lg font-bold text-gray-900 font-display">{title}</h2>
-            {subtitle && <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>}
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 font-display leading-tight">{title}</h2>
+            {subtitle && <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{subtitle}</p>}
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
             aria-label="Close modal"
           >
             <Icon name="close" size={18} />
@@ -81,7 +81,7 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="px-6 py-5 overflow-y-auto flex-1">{children}</div>
+        <div className="p-4 sm:px-6 sm:py-5 overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   );

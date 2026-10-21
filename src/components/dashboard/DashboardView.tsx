@@ -78,7 +78,7 @@ export const DashboardView: React.FC<{
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Executive switcher if admin or GM */}
           {(currentUser.role === "admin" || currentUser.role === "general_management") && (
             <div className="bg-gray-100/80 p-1 rounded-xl flex items-center border border-gray-200">
@@ -206,13 +206,13 @@ export const DashboardView: React.FC<{
                   </div>
                 </div>
 
-                <div className="flex items-baseline justify-between my-5">
+                <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 my-5">
                   <div>
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
                       TOTAL CASH COLLECTED
                     </span>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-3xl font-extrabold text-gray-900 font-display">
+                    <div className="flex flex-wrap items-baseline gap-2 mt-1">
+                      <span className="text-2xl sm:text-3xl font-extrabold text-gray-900 font-display">
                         ${(totalRentalRevenue + totalSalesRevenue).toLocaleString()}
                       </span>
                       <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -220,20 +220,20 @@ export const DashboardView: React.FC<{
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-medium text-gray-600">
                     <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-sm bg-emerald-800" /> Rental ($
+                      <span className="w-2.5 h-2.5 rounded-sm bg-emerald-800 shrink-0" /> Rental ($
                       {totalRentalRevenue.toLocaleString()})
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-sm bg-amber-400" /> Sales ($
+                      <span className="w-2.5 h-2.5 rounded-sm bg-amber-400 shrink-0" /> Sales ($
                       {totalSalesRevenue.toLocaleString()})
                     </span>
                   </div>
                 </div>
 
                 {/* Bar Chart Visual */}
-                <div className="h-44 pt-4 flex items-end justify-between gap-3 border-t border-gray-100">
+                <div className="h-44 pt-4 flex items-end justify-between gap-1.5 sm:gap-3 border-t border-gray-100">
                   {[
                     { month: "Jan", rental: 45, sales: 30 },
                     { month: "Feb", rental: 58, sales: 40 },
@@ -354,7 +354,7 @@ export const DashboardView: React.FC<{
               </div>
 
               <div className="overflow-x-auto mt-2">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs min-w-[620px]">
                   <thead>
                     <tr className="border-b border-gray-100 text-[10px] uppercase font-bold text-gray-400">
                       <th className="py-2.5">Material</th>
@@ -506,26 +506,26 @@ export const DashboardView: React.FC<{
       ) : (
         /* ================= CEO & GENERAL MANAGEMENT EXECUTIVE DASHBOARD ================= */
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-gray-900 text-white p-6 rounded-2xl shadow-md relative overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-gray-900 text-white p-4 sm:p-6 rounded-2xl shadow-md relative overflow-hidden">
             <div className="absolute right-0 top-0 bottom-0 w-80 bg-radial from-amber-400/10 to-transparent pointer-events-none" />
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6 relative z-10">
               <div>
                 <span className="text-[11px] font-bold tracking-widest text-amber-400 uppercase bg-amber-400/15 px-3 py-1 rounded-full border border-amber-400/30 inline-block">
                   C-SUITE EXECUTIVE INTELLIGENCE
                 </span>
-                <h2 className="text-2xl font-bold font-display mt-2">Executive Business Performance</h2>
+                <h2 className="text-xl sm:text-2xl font-bold font-display mt-2">Executive Business Performance</h2>
                 <p className="text-xs text-emerald-200 mt-1 max-w-xl">
                   Holistic financial reconciliation, asset valuation, rental utilization index, and gross margin analysis
                   across all operating branches.
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md px-4 py-3 rounded-xl border border-white/15">
+              <div className="flex items-center gap-3 sm:gap-4 bg-white/10 backdrop-blur-md p-3 sm:px-4 sm:py-3 rounded-xl border border-white/15 self-start sm:self-auto">
                 <div>
                   <span className="text-[10px] text-emerald-200 font-bold uppercase tracking-wider block">
                     TOTAL ASSET VALUATION
                   </span>
-                  <strong className="text-2xl font-bold text-amber-300 font-display">
+                  <strong className="text-xl sm:text-2xl font-bold text-amber-300 font-display">
                     ${totalInventoryValuation.toLocaleString()}
                   </strong>
                 </div>
@@ -534,7 +534,7 @@ export const DashboardView: React.FC<{
                   <span className="text-[10px] text-emerald-200 font-bold uppercase tracking-wider block">
                     GROSS MARGIN
                   </span>
-                  <strong className="text-2xl font-bold text-white font-display">48.6%</strong>
+                  <strong className="text-xl sm:text-2xl font-bold text-white font-display">48.6%</strong>
                 </div>
               </div>
             </div>
@@ -603,9 +603,9 @@ export const DashboardView: React.FC<{
                   { category: "Power & Climate", revenue: "$7,320", profit: "$4,200", margin: "57%", color: "bg-amber-500" },
                 ].map((row) => (
                   <div key={row.category}>
-                    <div className="flex items-center justify-between text-xs mb-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs mb-1 gap-1">
                       <span className="font-bold text-gray-900">{row.category}</span>
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <span className="text-gray-500">{row.revenue} rev</span>
                         <strong className="text-emerald-800 font-bold">{row.profit} profit</strong>
                         <span className="text-[10px] font-bold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">
@@ -636,7 +636,7 @@ export const DashboardView: React.FC<{
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-200/60">
                     <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">
                       FLEET UTILIZATION RATE
@@ -669,15 +669,15 @@ export const DashboardView: React.FC<{
                     {materials.slice(0, 3).map((item, idx) => (
                       <div
                         key={item.id}
-                        className="p-2.5 bg-gray-50/70 rounded-lg flex items-center justify-between text-xs border border-gray-200/50"
+                        className="p-2.5 bg-gray-50/70 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs border border-gray-200/50"
                       >
                         <div className="flex items-center gap-2.5">
-                          <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-900 font-bold text-[10px] flex items-center justify-center">
+                          <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-900 font-bold text-[10px] flex items-center justify-center shrink-0">
                             #{idx + 1}
                           </span>
                           <span className="font-bold text-gray-900">{item.name}</span>
                         </div>
-                        <span className="text-gray-500 font-medium">
+                        <span className="text-gray-500 font-medium sm:text-right">
                           {item.rentedOut + item.reserved} units active · ${item.rentalPriceDaily}/day
                         </span>
                       </div>
@@ -686,11 +686,11 @@ export const DashboardView: React.FC<{
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+              <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <span className="text-xs text-gray-500">Executive Report generated for: {currentUser.name}</span>
                 <button
                   onClick={() => handleExport("CSV")}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100/70 hover:bg-emerald-200/70 rounded-lg transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-900 bg-emerald-100/70 hover:bg-emerald-200/70 rounded-lg transition-colors self-start sm:self-auto"
                 >
                   <Icon name="download" size={13} /> Export Executive CSV
                 </button>

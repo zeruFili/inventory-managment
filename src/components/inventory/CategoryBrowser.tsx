@@ -88,7 +88,7 @@ export const CategoryBrowser: React.FC<CategoryBrowserProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-gray-100">
         <div>
           <h2 className="text-base font-bold text-gray-900 font-display">
             Browse Inventory by Category
@@ -97,7 +97,7 @@ export const CategoryBrowser: React.FC<CategoryBrowserProps> = ({
             Select a category to browse specific item models, view aggregate performance, and inspect individual units.
           </p>
         </div>
-        <span className="text-xs font-semibold text-emerald-900 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+        <span className="text-xs font-semibold text-emerald-900 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 self-start sm:self-auto shrink-0">
           {pureCategories.length} Categories · {materials.filter((m) => !m.isArchived).length} Models
         </span>
       </div>

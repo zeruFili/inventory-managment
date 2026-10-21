@@ -44,20 +44,27 @@ function AppContent() {
   // Global Quick Modals
   const [isAddMaterialOpen, setIsAddMaterialOpen] = useState<boolean>(false);
   const [isNewRentalOpen, setIsNewRentalOpen] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   return (
     <div className="min-h-screen bg-[#f8faf7] text-[#18352b] flex font-sans antialiased">
-      {/* Fixed Left Sidebar */}
-      <Sidebar activeModule={activeModule} onNavigate={setActiveModule} />
+      {/* Responsive Left Sidebar */}
+      <Sidebar
+        activeModule={activeModule}
+        onNavigate={setActiveModule}
+        isOpenMobile={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
+      />
 
-      {/* Main Workspace Area (Offset by sidebar width: 256px) */}
-      <div className="ml-64 flex-1 flex flex-col min-w-0">
+      {/* Main Workspace Area (Offset by sidebar width on desktop: lg:ml-64, full width on mobile/tablet) */}
+      <div className="lg:ml-64 flex-1 flex flex-col min-w-0">
         <Topbar
           onSearch={setGlobalSearch}
           onOpenNewRental={() => setIsNewRentalOpen(true)}
+          onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
         />
 
-        <main className="p-6 md:p-8 max-w-[1600px] w-full mx-auto flex-1">
+        <main className="p-3.5 sm:p-5 md:p-6 lg:p-8 max-w-[1600px] w-full mx-auto flex-1">
           {activeModule === "Dashboard" && (
             <DashboardView
               onNavigate={setActiveModule}

@@ -82,14 +82,14 @@ export const LogisticsView: React.FC = () => {
 
       {/* Role Protection Banner for Driver/Courier */}
       {isDriverOrCourier && (
-        <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-900">
+        <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-emerald-900">
           <div className="flex items-center gap-2.5">
-            <Icon name="truck" size={16} className="text-emerald-700" />
+            <Icon name="truck" size={16} className="text-emerald-700 shrink-0" />
             <span>
               <strong>Driver Access Mode:</strong> Financial details, costs, and inventory values are hidden for your security clearance.
             </span>
           </div>
-          <span className="text-[10px] font-bold bg-emerald-200/60 text-emerald-950 px-2 py-0.5 rounded">
+          <span className="text-[10px] font-bold bg-emerald-200/60 text-emerald-950 px-2 py-0.5 rounded self-start sm:self-auto shrink-0">
             Vehicle: VAN-04
           </span>
         </div>
@@ -137,7 +137,7 @@ export const LogisticsView: React.FC = () => {
             }`}
           >
             <div>
-              <div className="flex items-start justify-between pb-3 border-b border-gray-100">
+              <div className="flex flex-wrap items-start justify-between gap-2 pb-3 border-b border-gray-100">
                 <div className="flex items-center gap-2.5">
                   <div
                     className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
@@ -235,9 +235,9 @@ export const LogisticsView: React.FC = () => {
             </div>
 
             {/* Status Update Actions */}
-            <div className="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+            <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
               <span className="text-[10px] text-gray-400">Task ID: {task.id}</span>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {task.status === "Assigned" && (
                   <button
                     onClick={() => handleUpdateStatus(task.id, "In Transit")}
@@ -270,7 +270,7 @@ export const LogisticsView: React.FC = () => {
         ))}
 
         {!filteredTasks.length && (
-          <div className="col-span-2 py-12 text-center text-gray-400 bg-white rounded-2xl border border-gray-200">
+          <div className="col-span-full py-12 text-center text-gray-400 bg-white rounded-2xl border border-gray-200">
             <Icon name="truck" size={32} className="mx-auto mb-2 opacity-40 text-gray-400" />
             <strong className="block text-gray-700">No transport tasks found</strong>
             <span className="text-xs">All assigned routes are clear or completed.</span>

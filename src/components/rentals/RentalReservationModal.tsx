@@ -204,7 +204,7 @@ export const RentalReservationModal: React.FC<RentalReservationModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-3 py-1.5 bg-emerald-50 rounded-lg text-xs text-emerald-900">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-3 py-1.5 bg-emerald-50 rounded-lg text-xs text-emerald-900">
           <span>
             Calculated Duration: <strong>{rentalDurationDays} Day(s)</strong>
           </span>
@@ -279,7 +279,7 @@ export const RentalReservationModal: React.FC<RentalReservationModalProps> = ({
                 min="0"
                 value={depositAmount}
                 onChange={(e) => setDepositAmount(Number(e.target.value))}
-                className="w-24 text-xs font-bold border border-gray-300 rounded p-1 bg-white"
+                className="w-full max-w-[120px] text-xs font-bold border border-gray-300 rounded p-1 bg-white"
               />
             </div>
 
@@ -290,7 +290,7 @@ export const RentalReservationModal: React.FC<RentalReservationModalProps> = ({
                 min="0"
                 value={amountPaid}
                 onChange={(e) => setAmountPaid(Number(e.target.value))}
-                className="w-24 text-xs font-bold border border-gray-300 rounded p-1 bg-white text-emerald-800"
+                className="w-full max-w-[120px] text-xs font-bold border border-gray-300 rounded p-1 bg-white text-emerald-800"
               />
             </div>
 
@@ -302,7 +302,7 @@ export const RentalReservationModal: React.FC<RentalReservationModalProps> = ({
           </div>
         )}
 
-        <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
+        <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}

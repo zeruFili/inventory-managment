@@ -162,7 +162,7 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Category</label>
             <select
@@ -337,7 +337,7 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({
         </div>
 
         {/* Pricing, Supplier & Rates */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Daily Rental ($)</label>
             <input
@@ -388,7 +388,7 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({
         </div>
 
         {/* Purchase & Supplier */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Supplier</label>
             <select

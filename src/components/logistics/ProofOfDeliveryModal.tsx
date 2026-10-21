@@ -106,12 +106,12 @@ export const ProofOfDeliveryModal: React.FC<ProofOfDeliveryModalProps> = ({
           )}
         </div>
 
-        <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
+        <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
           <span>Digital Signature Timestamp:</span>
           <strong>{new Date().toISOString().replace("T", " ").slice(0, 16)}</strong>
         </div>
 
-        <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
+        <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}

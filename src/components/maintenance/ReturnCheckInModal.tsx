@@ -90,7 +90,7 @@ export const ReturnCheckInModal: React.FC<ReturnCheckInModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 pt-1 border-t border-gray-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 border-t border-gray-200">
                     <div>
                       <label className="text-[10px] font-bold text-gray-600 block mb-0.5">Quantity Returned</label>
                       <input

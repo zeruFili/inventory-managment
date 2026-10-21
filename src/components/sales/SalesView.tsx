@@ -65,7 +65,7 @@ export const SalesView: React.FC = () => {
       </div>
 
       {/* KPI Ribbon */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="p-4 bg-white rounded-2xl border border-gray-200 shadow-2xs">
           <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
             TOTAL SALES REVENUE
@@ -138,7 +138,7 @@ export const SalesView: React.FC = () => {
       {/* Sales Orders Table */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs min-w-[850px]">
             <thead className="bg-gray-50/80 border-b border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
               <tr>
                 <th className="py-3 px-4">Order & Invoice #</th>
