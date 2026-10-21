@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting...</title>
+    <script>
+      // GitHub Pages SPA redirect to index
+      const pathname = window.location.pathname;
+      const repoName = pathname.split('/')[1] ? '/' + pathname.split('/')[1] + '/' : '/';
+      window.location.replace(repoName);
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to app...</p>
+  </body>
+</html>

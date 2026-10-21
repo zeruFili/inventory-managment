@@ -9,7 +9,9 @@ interface RentalCalendarProps {
 }
 
 export const RentalCalendar: React.FC<RentalCalendarProps> = ({ onSelectRental }) => {
-  const { rentals, materials, customers } = useApp();
+  const { rentals, materials, customers, currentUser } = useApp();
+
+  const isStockManager = currentUser.role === "stock_manager";
 
   const [calendarView, setCalendarView] = useState<"day" | "week" | "month" | "year">("month");
   const [currentDate, setCurrentDate] = useState<Date>(new Date(2025, 5, 18)); // June 18, 2025
@@ -353,10 +355,12 @@ export const RentalCalendar: React.FC<RentalCalendarProps> = ({ onSelectRental }
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <strong className="text-sm font-bold text-gray-900 block font-display">${r.totalCost}</strong>
-                  <span className="text-xs text-gray-500 font-medium">Deposit: ${r.depositAmount} ({r.depositStatus})</span>
-                </div>
+                {!isStockManager && (
+                  <div className="text-right">
+                    <strong className="text-sm font-bold text-gray-900 block font-display">${r.totalCost}</strong>
+                    <span className="text-xs text-gray-500 font-medium">Deposit: ${r.depositAmount} ({r.depositStatus})</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

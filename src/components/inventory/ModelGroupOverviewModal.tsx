@@ -29,7 +29,14 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
     "overview" | "rentals" | "maintenance" | "financials"
   >("overview");
 
+  const isStockManager = currentUser.role === "stock_manager";
   const isAdmin = can("view_financials") || currentUser.role === "admin";
+
+  React.useEffect(() => {
+    if (isStockManager && activeTab === "rentals") {
+      setActiveTab("overview");
+    }
+  }, [isStockManager, activeTab]);
 
   // Compute all group-level metrics
   const individualItems = useMemo(() => {
@@ -140,18 +147,20 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
             Group Inventory & Availability
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("rentals")}
-            className={`px-3.5 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${
-              activeTab === "rentals"
-                ? "bg-emerald-950 text-white shadow-xs"
-                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-            }`}
-          >
-            <Icon name="calendar" size={14} />
-            Rental & Company History ({financialAnalytics.rentalBookingsCount})
-          </button>
+          {!isStockManager && (
+            <button
+              type="button"
+              onClick={() => setActiveTab("rentals")}
+              className={`px-3.5 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                activeTab === "rentals"
+                  ? "bg-emerald-950 text-white shadow-xs"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              }`}
+            >
+              <Icon name="calendar" size={14} />
+              Rental & Company History ({financialAnalytics.rentalBookingsCount})
+            </button>
+          )}
 
           <button
             type="button"
@@ -366,7 +375,7 @@ export const ModelGroupOverviewModal: React.FC<ModelGroupOverviewModalProps> = (
         )}
 
         {/* Tab 2: Rental History & Company Analytics */}
-        {activeTab === "rentals" && (
+        {activeTab === "rentals" && !isStockManager && (
           <div className="space-y-4">
             {/* Quick Rental Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

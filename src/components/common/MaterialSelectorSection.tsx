@@ -49,7 +49,8 @@ export const MaterialSelectorSection: React.FC<MaterialSelectorSectionProps> = (
   onSelectMaterial,
   disabled = false,
 }) => {
-  const { materials, checkMaterialAvailability } = useApp();
+  const { materials, checkMaterialAvailability, currentUser } = useApp();
+  const isStockManager = currentUser.role === "stock_manager";
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   // Default titles and labels per mode
@@ -313,8 +314,12 @@ export const MaterialSelectorSection: React.FC<MaterialSelectorSectionProps> = (
                         </div>
                         <div className="text-[11px] text-gray-500 flex items-center gap-2 mt-0.5">
                           <span className="text-emerald-800 font-semibold">{mat.category}</span>
-                          <span>•</span>
-                          <span>{unitPriceLabel}</span>
+                          {!isStockManager && (
+                            <>
+                              <span>•</span>
+                              <span>{unitPriceLabel}</span>
+                            </>
+                          )}
                           {mat.warehouse && (
                             <>
                               <span>•</span>
@@ -363,11 +368,13 @@ export const MaterialSelectorSection: React.FC<MaterialSelectorSectionProps> = (
                       </div>
 
                       {/* Subtotal */}
-                      <div className="w-20 text-right">
-                        <span className="font-bold text-gray-900 font-display">
-                          ${lineTotal.toLocaleString()}
-                        </span>
-                      </div>
+                      {!isStockManager && (
+                        <div className="w-20 text-right">
+                          <span className="font-bold text-gray-900 font-display">
+                            ${lineTotal.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
 
                       {/* Remove button */}
                       {!disabled && (

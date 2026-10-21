@@ -15,7 +15,8 @@ export const RentalExtensionModal: React.FC<RentalExtensionModalProps> = ({
   onClose,
   rental,
 }) => {
-  const { extendRental, showToast } = useApp();
+  const { extendRental, showToast, currentUser } = useApp();
+  const isStockManager = currentUser.role === "stock_manager";
 
   const [newReturnDate, setNewReturnDate] = useState<string>("");
   const [reason, setReason] = useState<string>("");
@@ -110,13 +111,17 @@ export const RentalExtensionModal: React.FC<RentalExtensionModalProps> = ({
             <span>Rented Materials:</span>
             <strong className="text-gray-900">{rental.items.reduce((acc, i) => acc + i.quantity, 0)} items</strong>
           </div>
-          <div className="flex justify-between">
-            <span>Daily Rental Subtotal:</span>
-            <strong className="text-gray-900">${rental.subtotal}</strong>
-          </div>
-          <p className="text-[11px] text-gray-400 pt-1">
-            Additional rental days will be automatically billed on the rental invoice upon return.
-          </p>
+          {!isStockManager && (
+            <>
+              <div className="flex justify-between">
+                <span>Daily Rental Subtotal:</span>
+                <strong className="text-gray-900">${rental.subtotal}</strong>
+              </div>
+              <p className="text-[11px] text-gray-400 pt-1">
+                Additional rental days will be automatically billed on the rental invoice upon return.
+              </p>
+            </>
+          )}
         </div>
 
         <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">

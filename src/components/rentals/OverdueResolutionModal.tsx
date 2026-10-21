@@ -16,6 +16,7 @@ export const OverdueResolutionModal: React.FC<OverdueResolutionModalProps> = ({
   rental,
 }) => {
   const { resolveOverdueRental, currentUser } = useApp();
+  const isStockManager = currentUser.role === "stock_manager";
 
   const [cause, setCause] = useState<string>("Company Transport Failed to Collect");
   const [contactAttempts, setContactAttempts] = useState<string>("Phone call on June 17, client stated items ready for pickup");
@@ -30,8 +31,8 @@ export const OverdueResolutionModal: React.FC<OverdueResolutionModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const feeToCharge = waiveFee ? 0 : standardLateFee;
-    resolveOverdueRental(rental.id, cause, feeToCharge, waiveFee, `${contactAttempts} | ${investigationNotes} | Promised: ${promisedReturnDate}`);
+    const feeToCharge = isStockManager || waiveFee ? 0 : standardLateFee;
+    resolveOverdueRental(rental.id, cause, feeToCharge, isStockManager || waiveFee, `${contactAttempts} | ${investigationNotes} | Promised: ${promisedReturnDate}`);
     onClose();
   };
 
@@ -98,25 +99,27 @@ export const OverdueResolutionModal: React.FC<OverdueResolutionModalProps> = ({
           </div>
         </div>
 
-        <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-gray-900">Calculated Late-Return Charge:</span>
-            <span className="text-sm font-bold text-gray-900">${standardLateFee}</span>
-          </div>
+        {!isStockManager && (
+          <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-gray-900">Calculated Late-Return Charge:</span>
+              <span className="text-sm font-bold text-gray-900">${standardLateFee}</span>
+            </div>
 
-          <div className="flex items-center gap-2 pt-1 border-t border-gray-200">
-            <input
-              type="checkbox"
-              id="waiveFee"
-              checked={waiveFee}
-              onChange={(e) => setWaiveFee(e.target.checked)}
-              className="w-4 h-4 text-emerald-600 rounded border-gray-300"
-            />
-            <label htmlFor="waiveFee" className="text-xs font-bold text-emerald-950 cursor-pointer">
-              Waive Late Charge (Approved by {currentUser.name} - {currentUser.role.replace("_", " ").toUpperCase()})
-            </label>
+            <div className="flex items-center gap-2 pt-1 border-t border-gray-200">
+              <input
+                type="checkbox"
+                id="waiveFee"
+                checked={waiveFee}
+                onChange={(e) => setWaiveFee(e.target.checked)}
+                className="w-4 h-4 text-emerald-600 rounded border-gray-300"
+              />
+              <label htmlFor="waiveFee" className="text-xs font-bold text-emerald-950 cursor-pointer">
+                Waive Late Charge (Approved by {currentUser.name} - {currentUser.role.replace("_", " ").toUpperCase()})
+              </label>
+            </div>
           </div>
-        </div>
+        )}
 
         <div>
           <label className="block text-xs font-bold text-gray-700 uppercase mb-1">

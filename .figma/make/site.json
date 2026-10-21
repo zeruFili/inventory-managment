@@ -1,5 +1,9 @@
 {
+  "title": "Stock Management",
   "description": "Streamline event management with a comprehensive system for inventory, rental, and sales, enabling efficient tracking, scheduling, and reporting for organizers.",
+  "icons": {
+    "icon": "./favicon.svg"
+  },
   "robots": {
     "index": false
   },

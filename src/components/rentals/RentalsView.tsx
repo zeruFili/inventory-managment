@@ -10,7 +10,9 @@ import RentalExtensionModal from "./RentalExtensionModal";
 import OverdueResolutionModal from "./OverdueResolutionModal";
 
 export const RentalsView: React.FC = () => {
-  const { rentals, updateRentalStatus, can } = useApp();
+  const { rentals, updateRentalStatus, can, currentUser } = useApp();
+
+  const isStockManager = currentUser.role === "stock_manager";
 
   const [activeTab, setActiveTab] = useState<string>("All");
   const [viewType, setViewType] = useState<"list" | "calendar">("list");
@@ -147,8 +149,8 @@ export const RentalsView: React.FC = () => {
                   <th className="py-3 px-3">Customer</th>
                   <th className="py-3 px-3">Rental Window</th>
                   <th className="py-3 px-3">Items Summary</th>
-                  <th className="py-3 px-3">Total Cost</th>
-                  <th className="py-3 px-3">Payment</th>
+                  {!isStockManager && <th className="py-3 px-3">Total Cost</th>}
+                  {!isStockManager && <th className="py-3 px-3">Payment</th>}
                   <th className="py-3 px-3">Status</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
@@ -191,27 +193,31 @@ export const RentalsView: React.FC = () => {
                       </span>
                     </td>
 
-                    <td className="py-3 px-3 font-bold text-gray-900 font-display">
-                      ${rental.totalCost}
-                      <span className="text-[10px] text-gray-400 font-sans block">
-                        Deposit: ${rental.depositAmount}
-                      </span>
-                    </td>
+                    {!isStockManager && (
+                      <td className="py-3 px-3 font-bold text-gray-900 font-display">
+                        ${rental.totalCost}
+                        <span className="text-[10px] text-gray-400 font-sans block">
+                          Deposit: ${rental.depositAmount}
+                        </span>
+                      </td>
+                    )}
 
-                    <td className="py-3 px-3">
-                      <Badge
-                        tone={
-                          rental.paymentStatus === "Paid"
-                            ? "green"
-                            : rental.paymentStatus === "Partial"
-                            ? "yellow"
-                            : "red"
-                        }
-                        size="sm"
-                      >
-                        {rental.paymentStatus}
-                      </Badge>
-                    </td>
+                    {!isStockManager && (
+                      <td className="py-3 px-3">
+                        <Badge
+                          tone={
+                            rental.paymentStatus === "Paid"
+                              ? "green"
+                              : rental.paymentStatus === "Partial"
+                              ? "yellow"
+                              : "red"
+                          }
+                          size="sm"
+                        >
+                          {rental.paymentStatus}
+                        </Badge>
+                      </td>
+                    )}
 
                     <td className="py-3 px-3">
                       <Badge
@@ -275,7 +281,7 @@ export const RentalsView: React.FC = () => {
 
                 {!filteredRentals.length && (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-gray-400">
+                    <td colSpan={isStockManager ? 6 : 8} className="py-12 text-center text-gray-400">
                       <Icon name="calendar" size={32} className="mx-auto mb-2 opacity-40 text-gray-400" />
                       <strong className="block text-gray-700">No rental reservations found</strong>
                       <span className="text-xs">Adjust search or add a new reservation.</span>
@@ -335,7 +341,9 @@ export const RentalsView: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <span className="font-bold text-gray-900 block">{item.quantity} units</span>
-                      <span className="text-[10px] text-gray-500">${item.dailyRate}/day · Line: ${item.lineTotal}</span>
+                      {!isStockManager && (
+                        <span className="text-[10px] text-gray-500">${item.dailyRate}/day · Line: ${item.lineTotal}</span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -343,33 +351,35 @@ export const RentalsView: React.FC = () => {
             </div>
 
             {/* Financials & Deposit Breakdown */}
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
-              <h3 className="font-bold text-gray-900 uppercase tracking-wider">Billing & Deposits</h3>
-              <div className="flex justify-between">
-                <span>Rental Subtotal:</span>
-                <strong className="text-gray-900">${selectedRentalForDetail.subtotal}</strong>
+            {!isStockManager && (
+              <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 space-y-2">
+                <h3 className="font-bold text-gray-900 uppercase tracking-wider">Billing & Deposits</h3>
+                <div className="flex justify-between">
+                  <span>Rental Subtotal:</span>
+                  <strong className="text-gray-900">${selectedRentalForDetail.subtotal}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tax (VAT 8.5%):</span>
+                  <strong className="text-gray-900">${selectedRentalForDetail.taxAmount}</strong>
+                </div>
+                <div className="flex justify-between text-sm pt-2 border-t border-gray-200 font-bold">
+                  <span>Total Amount:</span>
+                  <span className="text-emerald-950 font-display">${selectedRentalForDetail.totalCost}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 pt-1">
+                  <span>Amount Paid:</span>
+                  <span className="text-emerald-700 font-bold">${selectedRentalForDetail.amountPaid}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Outstanding Balance:</span>
+                  <span className="text-rose-700 font-bold">${selectedRentalForDetail.outstandingBalance}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 pt-1 border-t border-gray-200">
+                  <span>Security Deposit Held:</span>
+                  <span className="text-amber-700 font-bold">${selectedRentalForDetail.depositAmount} ({selectedRentalForDetail.depositStatus})</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Tax (VAT 8.5%):</span>
-                <strong className="text-gray-900">${selectedRentalForDetail.taxAmount}</strong>
-              </div>
-              <div className="flex justify-between text-sm pt-2 border-t border-gray-200 font-bold">
-                <span>Total Amount:</span>
-                <span className="text-emerald-950 font-display">${selectedRentalForDetail.totalCost}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 pt-1">
-                <span>Amount Paid:</span>
-                <span className="text-emerald-700 font-bold">${selectedRentalForDetail.amountPaid}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Outstanding Balance:</span>
-                <span className="text-rose-700 font-bold">${selectedRentalForDetail.outstandingBalance}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 pt-1 border-t border-gray-200">
-                <span>Security Deposit Held:</span>
-                <span className="text-amber-700 font-bold">${selectedRentalForDetail.depositAmount} ({selectedRentalForDetail.depositStatus})</span>
-              </div>
-            </div>
+            )}
 
             {/* Notes & Address */}
             <div className="space-y-1">

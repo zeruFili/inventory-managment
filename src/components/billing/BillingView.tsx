@@ -3,9 +3,12 @@ import { Invoice, SecurityDepositRecord } from "../../types";
 import { useApp } from "../../context/AppContext";
 import Icon from "../common/Icons";
 import Badge from "../common/Badge";
+import Modal from "../common/Modal";
 import PaymentModal from "./PaymentModal";
-import VerbalAgreementModal from "./VerbalAgreementModal";
 import CreateInvoiceModal from "./CreateInvoiceModal";
+import EditInvoiceModal from "./EditInvoiceModal";
+import CreateDepositModal from "./CreateDepositModal";
+import EditDepositModal from "./EditDepositModal";
 import MaterialSelectorSection, { SelectedItemLine } from "../common/MaterialSelectorSection";
 
 export const BillingView: React.FC = () => {
@@ -13,6 +16,8 @@ export const BillingView: React.FC = () => {
     invoices,
     securityDeposits,
     materials,
+    deleteInvoice,
+    deleteSecurityDeposit,
     recordDepositDeduction,
     recordDepositRefund,
     can,
@@ -23,8 +28,15 @@ export const BillingView: React.FC = () => {
   const [search, setSearch] = useState("");
 
   const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
+  const [editInvoice, setEditInvoice] = useState<Invoice | null>(null);
+  const [deleteInvoiceTarget, setDeleteInvoiceTarget] = useState<Invoice | null>(null);
+
   const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null);
-  const [verbalInvoice, setVerbalInvoice] = useState<Invoice | null>(null);
+
+  // Security Deposit modals state
+  const [isCreateDepositOpen, setIsCreateDepositOpen] = useState(false);
+  const [editDepositTarget, setEditDepositTarget] = useState<SecurityDepositRecord | null>(null);
+  const [deleteDepositTarget, setDeleteDepositTarget] = useState<SecurityDepositRecord | null>(null);
 
   // Deposit actions state
   const [depositModal, setDepositModal] = useState<{
@@ -56,6 +68,19 @@ export const BillingView: React.FC = () => {
       );
     });
   }, [invoices, activeTab, search]);
+
+  const filteredDeposits = useMemo(() => {
+    return securityDeposits.filter((d) => {
+      const q = search.toLowerCase();
+      return (
+        d.id.toLowerCase().includes(q) ||
+        d.rentalReference.toLowerCase().includes(q) ||
+        d.customerName.toLowerCase().includes(q) ||
+        d.status.toLowerCase().includes(q) ||
+        (d.deductionsExplanation && d.deductionsExplanation.toLowerCase().includes(q))
+      );
+    });
+  }, [securityDeposits, search]);
 
   const handleDepositActionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,18 +123,48 @@ export const BillingView: React.FC = () => {
             Billing, Invoices & Deposits
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Manage multi-payment receivables, isolate security deposit liabilities, and record authorized verbal agreements.
+            Manage multi-payment receivables and isolate security deposit liabilities in dedicated trust vaults.
           </p>
         </div>
 
         {can("manage_billing") && (
-          <button
-            onClick={() => setIsCreateInvoiceOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-emerald-950 hover:bg-emerald-900 rounded-xl transition-all shadow-xs shrink-0 self-start sm:self-auto"
-          >
-            <Icon name="plus" size={14} />
-            <span>New Invoice</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+            {activeTab === "Security Deposits Vault" ? (
+              <>
+                <button
+                  onClick={() => setIsCreateInvoiceOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-2xs"
+                >
+                  <Icon name="plus" size={13} />
+                  <span>New Invoice</span>
+                </button>
+                <button
+                  onClick={() => setIsCreateDepositOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-amber-900 hover:bg-amber-950 rounded-xl transition-all shadow-xs"
+                >
+                  <Icon name="plus" size={14} />
+                  <span>New Deposit Record</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setIsCreateDepositOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-2xs"
+                >
+                  <Icon name="plus" size={13} />
+                  <span>New Deposit</span>
+                </button>
+                <button
+                  onClick={() => setIsCreateInvoiceOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-emerald-950 hover:bg-emerald-900 rounded-xl transition-all shadow-xs"
+                >
+                  <Icon name="plus" size={14} />
+                  <span>New Invoice</span>
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
 
@@ -186,7 +241,11 @@ export const BillingView: React.FC = () => {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search invoices, customers, references..."
+              placeholder={
+                activeTab === "Security Deposits Vault"
+                  ? "Search deposits, rental ref, customer..."
+                  : "Search invoices, customers, references..."
+              }
               className="w-full text-xs font-medium pl-9 pr-3 py-2 border border-gray-200 rounded-lg bg-gray-50/50 text-gray-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
             />
           </div>
@@ -216,11 +275,6 @@ export const BillingView: React.FC = () => {
                   <tr key={inv.id} className="hover:bg-emerald-50/20 transition-colors">
                     <td className="py-3 px-4">
                       <strong className="text-xs font-bold text-gray-900 block font-mono">{inv.invoiceNumber}</strong>
-                      {inv.isVerbalAgreement && (
-                        <span className="inline-block mt-0.5 text-[9px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300">
-                          Verbal Agreement (Pending)
-                        </span>
-                      )}
                     </td>
 
                     <td className="py-3 px-3">
@@ -273,19 +327,55 @@ export const BillingView: React.FC = () => {
                           </button>
                         )}
 
-                        {can("record_verbal_agreement") && !inv.isVerbalAgreement && (
-                          <button
-                            onClick={() => setVerbalInvoice(inv)}
-                            className="px-2 py-1 text-[10px] font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-md border border-amber-200 transition-colors"
-                            title="Log Verbal Agreement"
-                          >
-                            Verbal Agree
-                          </button>
+                        {can("manage_billing") && (
+                          <>
+                            <button
+                              onClick={() => setEditInvoice(inv)}
+                              className="p-1.5 text-gray-500 hover:text-emerald-900 hover:bg-emerald-50 rounded-md transition-colors"
+                              title="Edit Invoice"
+                            >
+                              <Icon name="edit" size={14} />
+                            </button>
+                            <button
+                              onClick={() => setDeleteInvoiceTarget(inv)}
+                              className="p-1.5 text-gray-400 hover:text-rose-700 hover:bg-rose-50 rounded-md transition-colors"
+                              title="Delete Invoice"
+                            >
+                              <Icon name="trash" size={14} />
+                            </button>
+                          </>
                         )}
                       </div>
                     </td>
                   </tr>
                 ))}
+
+                {filteredInvoices.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="py-12 text-center">
+                      <div className="max-w-xs mx-auto space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto">
+                          <Icon name="receipt" size={20} />
+                        </div>
+                        <h4 className="text-xs font-bold text-gray-800">No invoices found</h4>
+                        <p className="text-[11px] text-gray-500">
+                          {search
+                            ? `No records match "${search}". Try adjusting your search.`
+                            : `No ${activeTab.toLowerCase()} invoices found in this view.`}
+                        </p>
+                        {can("manage_billing") && (
+                          <button
+                            onClick={() => setIsCreateInvoiceOpen(true)}
+                            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-emerald-950 hover:bg-emerald-900 rounded-lg shadow-2xs"
+                          >
+                            <Icon name="plus" size={12} />
+                            Create Invoice
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -293,16 +383,27 @@ export const BillingView: React.FC = () => {
       ) : (
         /* Security Deposits Vault */
         <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
-          <div className="p-4 bg-amber-50/50 border-b border-amber-200/60 flex items-center justify-between text-xs text-amber-900">
+          <div className="p-4 bg-amber-50/50 border-b border-amber-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-amber-900">
             <div className="flex items-center gap-2">
-              <Icon name="shield" size={16} className="text-amber-700" />
+              <Icon name="shield" size={16} className="text-amber-700 shrink-0" />
               <span>
                 <strong>Security Deposit Trust Vault:</strong> Deposits are strictly held liabilities and NOT recognized as earned rental income until forfeited or deducted for damages.
               </span>
             </div>
-            <strong className="text-amber-950 font-display">
-              Total Trust Held: ${totalDepositLiability.toLocaleString()}
-            </strong>
+            <div className="flex items-center gap-3 shrink-0">
+              <strong className="text-amber-950 font-display">
+                Total Trust Held: ${totalDepositLiability.toLocaleString()}
+              </strong>
+              {can("manage_billing") && (
+                <button
+                  onClick={() => setIsCreateDepositOpen(true)}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-amber-950 bg-amber-200/80 hover:bg-amber-300 rounded-lg transition-colors border border-amber-300 shadow-2xs"
+                >
+                  <Icon name="plus" size={13} />
+                  <span>Add Security Deposit</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -320,11 +421,21 @@ export const BillingView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {securityDeposits.map((dep) => (
+                {filteredDeposits.map((dep) => (
                   <tr key={dep.id} className="hover:bg-amber-50/20 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-gray-900">{dep.rentalReference}</td>
+                    <td className="py-3 px-4 font-mono font-bold text-gray-900">
+                      <div>{dep.rentalReference}</div>
+                      <span className="text-[10px] text-gray-400 font-mono">{dep.id}</span>
+                    </td>
 
-                    <td className="py-3 px-3 font-bold text-gray-900">{dep.customerName}</td>
+                    <td className="py-3 px-3 font-bold text-gray-900">
+                      {dep.customerName}
+                      {dep.deductionsExplanation && (
+                        <span className="block text-[10px] font-normal text-gray-400 truncate max-w-xs">
+                          {dep.deductionsExplanation}
+                        </span>
+                      )}
+                    </td>
 
                     <td className="py-3 px-3 font-bold text-gray-900 font-display">${dep.receivedAmount}</td>
 
@@ -346,48 +457,92 @@ export const BillingView: React.FC = () => {
                     </td>
 
                     <td className="py-3 px-4 text-right">
-                      {dep.remainingLiability > 0 && can("manage_billing") && (
-                        <div className="inline-flex items-center gap-1.5">
-                          <button
-                            onClick={() => {
-                              setDepositModal({ deposit: dep, action: "deduct" });
-                              setDepositActionAmount(Math.min(100, dep.remainingLiability));
-                            }}
-                            className="px-2 py-1 text-[11px] font-bold text-rose-800 bg-rose-50 hover:bg-rose-100 rounded-md border border-rose-200 transition-colors"
-                          >
-                            Deduct Damage
-                          </button>
-                          <button
-                            onClick={() => {
-                              setDepositModal({ deposit: dep, action: "refund" });
-                              setDepositActionAmount(dep.remainingLiability);
-                            }}
-                            className="px-2.5 py-1 text-[11px] font-bold text-emerald-900 bg-emerald-100/70 hover:bg-emerald-200 rounded-md transition-colors"
-                          >
-                            Refund Deposit
-                          </button>
-                        </div>
-                      )}
+                      <div className="inline-flex items-center gap-1">
+                        {dep.remainingLiability > 0 && can("manage_billing") && (
+                          <>
+                            <button
+                              onClick={() => {
+                                setDepositModal({ deposit: dep, action: "deduct" });
+                                setDepositActionAmount(Math.min(100, dep.remainingLiability));
+                              }}
+                              className="px-2 py-1 text-[11px] font-bold text-rose-800 bg-rose-50 hover:bg-rose-100 rounded-md border border-rose-200 transition-colors"
+                              title="Deduct Damage"
+                            >
+                              Deduct
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDepositModal({ deposit: dep, action: "refund" });
+                                setDepositActionAmount(dep.remainingLiability);
+                              }}
+                              className="px-2 py-1 text-[11px] font-bold text-emerald-900 bg-emerald-100/70 hover:bg-emerald-200 rounded-md transition-colors"
+                              title="Refund Deposit"
+                            >
+                              Refund
+                            </button>
+                          </>
+                        )}
+
+                        {can("manage_billing") && (
+                          <>
+                            <button
+                              onClick={() => setEditDepositTarget(dep)}
+                              className="p-1.5 text-gray-500 hover:text-amber-950 hover:bg-amber-100/60 rounded-md transition-colors"
+                              title="Edit Deposit Record"
+                            >
+                              <Icon name="edit" size={14} />
+                            </button>
+                            <button
+                              onClick={() => setDeleteDepositTarget(dep)}
+                              className="p-1.5 text-gray-400 hover:text-rose-700 hover:bg-rose-50 rounded-md transition-colors"
+                              title="Delete Deposit Record"
+                            >
+                              <Icon name="trash" size={14} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
+
+                {filteredDeposits.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center">
+                      <div className="max-w-xs mx-auto space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+                          <Icon name="shield" size={20} />
+                        </div>
+                        <h4 className="text-xs font-bold text-gray-800">No deposit records found</h4>
+                        <p className="text-[11px] text-gray-500">
+                          {search
+                            ? `No deposit entries match "${search}". Try adjusting your search.`
+                            : "There are currently no security deposits in the trust vault."}
+                        </p>
+                        {can("manage_billing") && (
+                          <button
+                            onClick={() => setIsCreateDepositOpen(true)}
+                            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-amber-900 hover:bg-amber-950 rounded-lg shadow-2xs"
+                          >
+                            <Icon name="plus" size={12} />
+                            Add Security Deposit
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* Payment and Verbal Modals */}
+      {/* Payment Modal */}
       <PaymentModal
         isOpen={!!paymentInvoice}
         onClose={() => setPaymentInvoice(null)}
         invoice={paymentInvoice}
-      />
-
-      <VerbalAgreementModal
-        isOpen={!!verbalInvoice}
-        onClose={() => setVerbalInvoice(null)}
-        invoice={verbalInvoice}
       />
 
       {/* Deposit Action Modal */}
@@ -519,6 +674,144 @@ export const BillingView: React.FC = () => {
         isOpen={isCreateInvoiceOpen}
         onClose={() => setIsCreateInvoiceOpen(false)}
       />
+
+      {/* Edit Invoice Modal */}
+      <EditInvoiceModal
+        isOpen={!!editInvoice}
+        onClose={() => setEditInvoice(null)}
+        invoice={editInvoice}
+      />
+
+      {/* Create Security Deposit Modal */}
+      <CreateDepositModal
+        isOpen={isCreateDepositOpen}
+        onClose={() => setIsCreateDepositOpen(false)}
+      />
+
+      {/* Edit Security Deposit Modal */}
+      <EditDepositModal
+        isOpen={!!editDepositTarget}
+        onClose={() => setEditDepositTarget(null)}
+        deposit={editDepositTarget}
+      />
+
+      {/* Delete Invoice Confirmation Modal */}
+      {deleteInvoiceTarget && (
+        <Modal
+          isOpen={!!deleteInvoiceTarget}
+          onClose={() => setDeleteInvoiceTarget(null)}
+          title="Delete Invoice Record"
+          subtitle={`Are you sure you want to permanently delete invoice ${deleteInvoiceTarget.invoiceNumber}?`}
+          badge="DANGER"
+          maxWidth="md"
+        >
+          <div className="space-y-4">
+            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-1.5 text-xs text-rose-950">
+              <div className="flex justify-between">
+                <span className="text-rose-700">Invoice Number:</span>
+                <strong className="font-mono">{deleteInvoiceTarget.invoiceNumber}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-rose-700">Customer:</span>
+                <strong className="font-semibold">{deleteInvoiceTarget.customerName}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-rose-700">Total Invoiced:</span>
+                <strong className="font-display">${deleteInvoiceTarget.totalAmount.toLocaleString()}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-rose-700">Outstanding Balance:</span>
+                <strong className="font-display text-rose-800">${deleteInvoiceTarget.outstandingBalance.toLocaleString()}</strong>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-500">
+              This action cannot be undone. The invoice, along with its payment records and outstanding balance, will be removed from financial reconciliation.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setDeleteInvoiceTarget(null)}
+                className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteInvoice(deleteInvoiceTarget.id);
+                  setDeleteInvoiceTarget(null);
+                }}
+                className="px-4 py-2 text-xs font-bold text-white bg-rose-700 hover:bg-rose-800 rounded-lg transition-colors shadow-xs"
+              >
+                Delete Invoice
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Delete Deposit Confirmation Modal */}
+      {deleteDepositTarget && (
+        <Modal
+          isOpen={!!deleteDepositTarget}
+          onClose={() => setDeleteDepositTarget(null)}
+          title="Delete Security Deposit Record"
+          subtitle={`Are you sure you want to delete deposit record ${deleteDepositTarget.id}?`}
+          badge="DANGER"
+          maxWidth="md"
+        >
+          <div className="space-y-4">
+            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl space-y-1.5 text-xs text-amber-950">
+              <div className="flex justify-between">
+                <span className="text-amber-800">Deposit ID:</span>
+                <strong className="font-mono">{deleteDepositTarget.id}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-amber-800">Rental Reference:</span>
+                <strong className="font-mono">{deleteDepositTarget.rentalReference}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-amber-800">Customer:</span>
+                <strong className="font-semibold">{deleteDepositTarget.customerName}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-amber-800">Deposit Received:</span>
+                <strong className="font-display">${deleteDepositTarget.receivedAmount.toLocaleString()}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-amber-800">Remaining Liability:</span>
+                <strong className="font-display font-bold text-amber-900">${deleteDepositTarget.remainingLiability.toLocaleString()}</strong>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-500">
+              Deleting this record will remove the escrow liability from the Security Deposits Vault.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setDeleteDepositTarget(null)}
+                className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteSecurityDeposit(deleteDepositTarget.id);
+                  setDeleteDepositTarget(null);
+                }}
+                className="px-4 py-2 text-xs font-bold text-white bg-rose-700 hover:bg-rose-800 rounded-lg transition-colors shadow-xs"
+              >
+                Delete Deposit Record
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

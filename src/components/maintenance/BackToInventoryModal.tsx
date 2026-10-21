@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { RepairWorkOrder, MaterialCondition } from "../../types";
+import { RepairWorkOrder, RentalReservation, MaterialCondition } from "../../types";
 import { useApp } from "../../context/AppContext";
 import Modal from "../common/Modal";
 import Icon from "../common/Icons";
@@ -7,22 +7,27 @@ import Icon from "../common/Icons";
 interface BackToInventoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  workOrder: RepairWorkOrder | null;
+  workOrder?: RepairWorkOrder | null;
+  rentalOrder?: RentalReservation | null;
 }
 
 export const BackToInventoryModal: React.FC<BackToInventoryModalProps> = ({
   isOpen,
   onClose,
   workOrder,
+  rentalOrder,
 }) => {
-  const { materials, updateWorkOrderStatus } = useApp();
+  const { materials, updateWorkOrderStatus, restockRentalToInventory } = useApp();
   const [condition, setCondition] = useState<MaterialCondition>("Good");
-  const [releaseNotes, setReleaseNotes] = useState<string>(
-    "Maintenance overhaul completed and unit certified ready for active rental stock."
-  );
+  const [releaseNotes, setReleaseNotes] = useState<string>("");
 
   React.useEffect(() => {
-    if (workOrder) {
+    if (rentalOrder) {
+      setCondition("Good");
+      setReleaseNotes(
+        `Maintained order inspection passed. Equipment returned in event-ready condition and restocked to warehouse.`
+      );
+    } else if (workOrder) {
       setCondition(workOrder.postRepairCondition || "Good");
       setReleaseNotes(
         workOrder.workPerformed
@@ -30,16 +35,23 @@ export const BackToInventoryModal: React.FC<BackToInventoryModalProps> = ({
           : "Maintenance completed. Equipment certified and restored to available stock."
       );
     }
-  }, [workOrder, isOpen]);
+  }, [workOrder, rentalOrder, isOpen]);
 
-  if (!workOrder) return null;
+  if (!workOrder && !rentalOrder) return null;
 
-  const mat = materials.find((m) => m.id === workOrder.materialId);
+  const totalItemsCount = rentalOrder
+    ? rentalOrder.items.reduce((acc, i) => acc + i.quantity, 0)
+    : 1;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Passing status "Completed" and inspectionPassed true activates restocking in AppContext
-    updateWorkOrderStatus(workOrder.id, "Completed", true, condition, releaseNotes);
+
+    if (rentalOrder) {
+      restockRentalToInventory(rentalOrder.id, condition, releaseNotes);
+    } else if (workOrder) {
+      updateWorkOrderStatus(workOrder.id, "Completed", true, condition, releaseNotes);
+    }
+
     onClose();
   };
 
@@ -48,38 +60,101 @@ export const BackToInventoryModal: React.FC<BackToInventoryModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Restock Equipment Back to Inventory"
-      subtitle="Verify maintenance completion, select the physical condition, and return gear to rentable inventory"
+      subtitle={
+        rentalOrder
+          ? `Maintained Order: ${rentalOrder.reservationNumber} · Customer: ${rentalOrder.customerName}`
+          : `Workshop Order: ${workOrder?.workOrderNumber} · Technician: ${workOrder?.assignedTechnician}`
+      }
       badge="INVENTORY RESTOCK"
       maxWidth="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Item Summary Card */}
-        <div className="p-3.5 bg-gray-50 border border-gray-200 rounded-xl flex items-center gap-3">
-          {mat?.imageUrl ? (
-            <img
-              src={mat.imageUrl}
-              alt={workOrder.materialName}
-              className="w-14 h-14 object-cover rounded-lg border border-gray-200 bg-white shadow-2xs"
-            />
-          ) : (
-            <div className="w-14 h-14 rounded-lg bg-emerald-950 text-white flex items-center justify-center font-bold">
-              <Icon name="box" size={20} />
+        {/* If Rental Order: List all materials being restocked */}
+        {rentalOrder ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                Materials Returning to Inventory ({rentalOrder.items.length} items · {totalItemsCount} units)
+              </span>
+              <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-bold">
+                {rentalOrder.reservationNumber}
+              </span>
             </div>
-          )}
-          <div className="min-w-0 flex-1 text-xs">
-            <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">
-              Work Order #{workOrder.workOrderNumber} · {mat?.code || mat?.model || "Item"}
-            </span>
-            <strong className="text-sm font-bold text-gray-900 block truncate">
-              {workOrder.materialName}
-            </strong>
-            <div className="flex items-center gap-2 mt-1 text-[11px] text-gray-600">
-              <span>Technician: <strong className="text-gray-900">{workOrder.assignedTechnician}</strong></span>
-              <span>·</span>
-              <span>Repair Cost: <strong className="text-emerald-800 font-display">${workOrder.totalCost}</strong></span>
+
+            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+              {rentalOrder.items.map((item) => {
+                const mat = materials.find((m) => m.id === item.materialId);
+                return (
+                  <div
+                    key={item.materialId}
+                    className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {mat?.imageUrl ? (
+                        <img
+                          src={mat.imageUrl}
+                          alt={item.materialName}
+                          className="w-10 h-10 object-cover rounded-lg border border-gray-200 bg-white shadow-2xs shrink-0"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-emerald-950 text-white flex items-center justify-center font-bold shrink-0">
+                          <Icon name="box" size={16} />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <strong className="text-gray-900 block font-bold truncate">
+                          {item.materialName}
+                        </strong>
+                        <span className="text-[10px] text-gray-500 font-mono">
+                          {item.materialCode} · Category: {item.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="inline-block px-2.5 py-1 text-xs font-bold text-emerald-950 bg-emerald-100/70 border border-emerald-200 rounded-lg">
+                        +{item.quantity} units
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
+        ) : workOrder ? (
+          /* If Work Order: Single Material Card */
+          (() => {
+            const mat = materials.find((m) => m.id === workOrder.materialId);
+            return (
+              <div className="p-3.5 bg-gray-50 border border-gray-200 rounded-xl flex items-center gap-3">
+                {mat?.imageUrl ? (
+                  <img
+                    src={mat.imageUrl}
+                    alt={workOrder.materialName}
+                    className="w-14 h-14 object-cover rounded-lg border border-gray-200 bg-white shadow-2xs"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-lg bg-emerald-950 text-white flex items-center justify-center font-bold">
+                    <Icon name="box" size={20} />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1 text-xs">
+                  <span className="text-[10px] font-mono text-gray-500 uppercase tracking-wider block">
+                    Work Order #{workOrder.workOrderNumber} · {mat?.code || mat?.model || "Item"}
+                  </span>
+                  <strong className="text-sm font-bold text-gray-900 block truncate">
+                    {workOrder.materialName}
+                  </strong>
+                  <div className="flex items-center gap-2 mt-1 text-[11px] text-gray-600">
+                    <span>Technician: <strong className="text-gray-900">{workOrder.assignedTechnician}</strong></span>
+                    <span>·</span>
+                    <span>Repair Cost: <strong className="text-emerald-800 font-display">${workOrder.totalCost}</strong></span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()
+        ) : null}
 
         {/* Condition Selection */}
         <div>
@@ -145,14 +220,14 @@ export const BackToInventoryModal: React.FC<BackToInventoryModalProps> = ({
         {/* Quality Certification Notes */}
         <div>
           <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-            Inspection & Release Notes
+            Inspection & Restock Notes
           </label>
           <textarea
             rows={2}
             value={releaseNotes}
             onChange={(e) => setReleaseNotes(e.target.value)}
             className="w-full text-xs border border-gray-200 rounded-xl p-2.5 bg-gray-50/50 text-gray-900 focus:bg-white focus:border-emerald-900 outline-none"
-            placeholder="Document testing, quality sign-off, or technician remarks..."
+            placeholder="Document testing, quality sign-off, or return inspection remarks..."
           />
         </div>
 
@@ -162,7 +237,9 @@ export const BackToInventoryModal: React.FC<BackToInventoryModalProps> = ({
           <div>
             <strong className="font-bold block">Inventory Balance Impact</strong>
             <span className="text-[11px] text-emerald-800">
-              Confirming this release decrements 1 unit from "Under Repair" and immediately increments "Physically Available" stock in the inventory catalog under the selected "{condition}" condition.
+              {rentalOrder
+                ? `Confirming this restock restores all ${totalItemsCount} units across this order back to "Physically Available" stock under "${condition}" condition, and marks the rental order as Returned.`
+                : `Confirming this release decrements 1 unit from "Under Repair" and immediately increments "Physically Available" stock in the inventory catalog under the selected "${condition}" condition.`}
             </span>
           </div>
         </div>

@@ -132,6 +132,11 @@ interface AppContextType {
     condition: MaterialCondition,
     notes: string
   ) => void;
+  restockRentalToInventory: (
+    rentalId: string,
+    condition: MaterialCondition,
+    notes: string
+  ) => void;
 
   // Logistics
   createDeliveryTask: (task: Omit<DeliveryTask, "id" | "taskNumber">) => void;
@@ -148,8 +153,13 @@ interface AppContextType {
 
   // Billing & Payments
   createInvoice: (invoice: Omit<Invoice, "id" | "invoiceNumber">) => void;
+  updateInvoice: (invoiceId: string, updates: Partial<Invoice>) => void;
+  deleteInvoice: (invoiceId: string) => void;
   recordInvoicePayment: (invoiceId: string, amount: number, method: string, reference: string) => void;
   recordVerbalAgreement: (invoiceId: string, agreedTerms: string, promisedDate: string, notes: string) => void;
+  createSecurityDeposit: (deposit: Omit<SecurityDepositRecord, "id" | "remainingLiability">) => void;
+  updateSecurityDeposit: (depositId: string, updates: Partial<SecurityDepositRecord>) => void;
+  deleteSecurityDeposit: (depositId: string) => void;
   recordDepositDeduction: (
     depositId: string,
     deductionAmount: number,
@@ -174,7 +184,8 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [users, setUsers] = useState<User[]>(initialUsers);
-  const [currentUser, setCurrentUser] = useState<User>(initialUsers[0]); // default admin
+  const defaultUser = initialUsers.find((u) => u.role === "stock_manager") || initialUsers[0];
+  const [currentUser, setCurrentUser] = useState<User>(defaultUser);
   const [materials, setMaterials] = useState<Material[]>(initialMaterials);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>(initialStockMovements);
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
@@ -319,10 +330,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
     if (r === "stock_manager") {
       return [
-        "view_all",
         "manage_inventory",
         "manage_rentals",
-        "manage_maintenance",
       ].includes(permission);
     }
     if (r === "accountant") {
@@ -864,6 +873,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             underRepair: m.underRepair + item.damagedQty,
             awaitingInspection: m.awaitingInspection,
             retiredQuantity: m.retiredQuantity + item.missingQty, // missing written off
+            physicalCondition: condition || m.physicalCondition,
+            operationalStatus: "Available",
           };
         }
         return m;
@@ -891,6 +902,55 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     logAudit("RETURN_CHECKIN", "Rentals", rentalId, `Processed gear return. Condition: ${condition}, Damaged: ${hasDamage}, Missing: ${hasMissing}`);
     showToast(`Return check-in completed for rental ${rentalId}.`);
+  };
+
+  const restockRentalToInventory = (
+    rentalId: string,
+    condition: MaterialCondition,
+    notes: string
+  ) => {
+    const rent = rentals.find((r) => r.id === rentalId);
+    if (!rent) return;
+
+    // Adjust inventory
+    setMaterials((prev) =>
+      prev.map((m) => {
+        const item = rent.items.find((i) => i.materialId === m.id);
+        if (item) {
+          return {
+            ...m,
+            rentedOut: Math.max(0, m.rentedOut - item.quantity),
+            physicallyAvailable: m.physicallyAvailable + item.quantity,
+            physicalCondition: condition || m.physicalCondition,
+            operationalStatus: "Available",
+          };
+        }
+        return m;
+      })
+    );
+
+    // Update rental status to Returned
+    setRentals((prev) =>
+      prev.map((r) =>
+        r.id === rentalId
+          ? {
+              ...r,
+              status: "Returned",
+              actualReturnDate: new Date().toISOString().replace("T", " ").slice(0, 16),
+              isOverdue: false,
+              notes: `${r.notes || ""} | Restocked back to inventory. Condition: ${condition}. ${notes}`,
+            }
+          : r
+      )
+    );
+
+    logAudit(
+      "RESTOCK_TO_INVENTORY",
+      "Maintenance",
+      rentalId,
+      `Maintained Order ${rent.reservationNumber} restocked back to available inventory with condition: ${condition}`
+    );
+    showToast(`Order ${rent.reservationNumber} successfully restocked back to inventory as ${condition}!`);
   };
 
   // Logistics
@@ -1039,6 +1099,39 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     showToast(`Invoice ${invNum} created.`);
   };
 
+  const updateInvoice = (invoiceId: string, updates: Partial<Invoice>) => {
+    setInvoices((prev) =>
+      prev.map((inv) => {
+        if (inv.id === invoiceId) {
+          const merged = { ...inv, ...updates };
+          const totalAmount = merged.totalAmount ?? inv.totalAmount;
+          const amountPaid = merged.amountPaid ?? inv.amountPaid;
+          const outstandingBalance = Math.max(0, totalAmount - amountPaid);
+          const paymentStatus =
+            updates.paymentStatus ??
+            (outstandingBalance === 0 ? "Paid" : amountPaid > 0 ? "Partial" : "Unpaid");
+          return {
+            ...merged,
+            totalAmount,
+            amountPaid,
+            outstandingBalance,
+            paymentStatus,
+          };
+        }
+        return inv;
+      })
+    );
+    logAudit("UPDATE_INVOICE", "Billing", invoiceId, `Updated invoice details for ID ${invoiceId}`);
+    showToast("Invoice updated successfully.");
+  };
+
+  const deleteInvoice = (invoiceId: string) => {
+    const inv = invoices.find((i) => i.id === invoiceId);
+    setInvoices((prev) => prev.filter((i) => i.id !== invoiceId));
+    logAudit("DELETE_INVOICE", "Billing", invoiceId, `Deleted invoice ${inv?.invoiceNumber || invoiceId}`);
+    showToast(`Invoice ${inv?.invoiceNumber || invoiceId} deleted.`);
+  };
+
   const recordInvoicePayment = (invoiceId: string, amount: number, method: string, reference: string) => {
     setInvoices((prev) =>
       prev.map((inv) => {
@@ -1132,6 +1225,89 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
     logAudit("DEPOSIT_REFUND", "Billing", depositId, `Refunded deposit of $${refundAmount}`);
     showToast(`Deposit refund of $${refundAmount} recorded.`);
+  };
+
+  const createSecurityDeposit = (depositData: Omit<SecurityDepositRecord, "id" | "remainingLiability">) => {
+    const nextNum = (securityDeposits.length + 1).toString().padStart(2, "0");
+    const newId = `DEP-${nextNum}`;
+    const receivedAmount = Number(depositData.receivedAmount) || 0;
+    const deductedAmount = Number(depositData.deductedAmount) || 0;
+    const refundedAmount = Number(depositData.refundedAmount) || 0;
+    const remainingLiability = Math.max(0, receivedAmount - deductedAmount - refundedAmount);
+
+    let status = depositData.status;
+    if (!status) {
+      if (remainingLiability === 0 && refundedAmount > 0) status = "Refunded";
+      else if (remainingLiability === 0 && deductedAmount > 0) status = "Deducted";
+      else if (deductedAmount > 0 && remainingLiability > 0) status = "Partially Deducted";
+      else status = "Held";
+    }
+
+    const newDeposit: SecurityDepositRecord = {
+      ...depositData,
+      id: newId,
+      receivedAmount,
+      deductedAmount,
+      refundedAmount,
+      remainingLiability,
+      status,
+      receivedDate: depositData.receivedDate || new Date().toISOString().slice(0, 10),
+    };
+
+    setSecurityDeposits((prev) => [newDeposit, ...prev]);
+    logAudit(
+      "CREATE_DEPOSIT",
+      "Billing",
+      newId,
+      `Recorded security deposit of $${receivedAmount} for ${depositData.customerName} (${depositData.rentalReference})`
+    );
+    showToast(`Security deposit record for ${depositData.rentalReference} created.`);
+  };
+
+  const updateSecurityDeposit = (depositId: string, updates: Partial<SecurityDepositRecord>) => {
+    setSecurityDeposits((prev) =>
+      prev.map((d) => {
+        if (d.id === depositId) {
+          const merged = { ...d, ...updates };
+          const receivedAmount = Number(merged.receivedAmount) || 0;
+          const deductedAmount = Number(merged.deductedAmount) || 0;
+          const refundedAmount = Number(merged.refundedAmount) || 0;
+          const remainingLiability = Math.max(0, receivedAmount - deductedAmount - refundedAmount);
+
+          let status = updates.status || d.status;
+          if (!updates.status) {
+            if (remainingLiability === 0 && refundedAmount > 0) status = "Refunded";
+            else if (remainingLiability === 0 && deductedAmount > 0) status = "Deducted";
+            else if (deductedAmount > 0 && remainingLiability > 0) status = "Partially Deducted";
+            else status = "Held";
+          }
+
+          return {
+            ...merged,
+            receivedAmount,
+            deductedAmount,
+            refundedAmount,
+            remainingLiability,
+            status,
+          };
+        }
+        return d;
+      })
+    );
+    logAudit("UPDATE_DEPOSIT", "Billing", depositId, `Updated security deposit record ${depositId}`);
+    showToast("Security deposit updated successfully.");
+  };
+
+  const deleteSecurityDeposit = (depositId: string) => {
+    const dep = securityDeposits.find((d) => d.id === depositId);
+    setSecurityDeposits((prev) => prev.filter((d) => d.id !== depositId));
+    logAudit(
+      "DELETE_DEPOSIT",
+      "Billing",
+      depositId,
+      `Deleted deposit record for ${dep?.customerName || depositId} (${dep?.rentalReference || ""})`
+    );
+    showToast(`Security deposit record ${depositId} deleted.`);
   };
 
   // Damage & Maintenance
@@ -1273,13 +1449,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       extendRental,
       resolveOverdueRental,
       processReturnCheckIn,
+      restockRentalToInventory,
       createDeliveryTask,
       updateDeliveryTaskStatus,
       createSalesOrder,
       fulfillSalesOrder,
       createInvoice,
+      updateInvoice,
+      deleteInvoice,
       recordInvoicePayment,
       recordVerbalAgreement,
+      createSecurityDeposit,
+      updateSecurityDeposit,
+      deleteSecurityDeposit,
       recordDepositDeduction,
       recordDepositRefund,
       createDamageReport,

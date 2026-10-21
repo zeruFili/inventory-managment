@@ -12,8 +12,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeModule, onNavigate }) =>
 
   const overdueCount = rentals.filter((r) => r.isOverdue || r.status === "Overdue").length;
   const lowStockCount = materials.filter((m) => m.physicallyAvailable <= m.lowStockThreshold).length;
+  const isStockManager = currentUser.role === "stock_manager";
 
-  const navGroups: {
+  const allNavGroups: {
     label: string;
     items: { id: string; label: string; icon: IconName; badge?: number }[];
   }[] = [
@@ -44,16 +45,41 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeModule, onNavigate }) =>
     },
   ];
 
+  const navGroups = allNavGroups
+    .map((group) => {
+      if (isStockManager) {
+        if (group.label === "BUSINESS OPERATIONS" || group.label === "ADMINISTRATION") {
+          return null;
+        }
+        if (group.label === "WORKSPACE") {
+          return {
+            ...group,
+            items: group.items.filter((item) => item.id !== "Customers" && item.id !== "Suppliers"),
+          };
+        }
+      }
+      return group;
+    })
+    .filter(Boolean) as typeof allNavGroups;
+
   return (
     <aside className="w-64 bg-[#123d32] text-white flex flex-col fixed inset-y-0 left-0 z-40 shadow-xl select-none">
       {/* Brand Header */}
       <div className="h-16 px-5 border-b border-white/10 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-amber-400 text-emerald-950 font-display font-black flex items-center justify-center text-sm tracking-tight shadow-md">
-          ST
+        <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 p-1 flex items-center justify-center shadow-md overflow-hidden shrink-0">
+          <img
+            src="./doqa-logo.webp"
+            alt="Doqa Logo"
+            className="w-full h-full object-contain"
+            onError={(e) => {
+              // Fallback to stylized initials if image fails
+              (e.currentTarget as HTMLElement).style.display = "none";
+            }}
+          />
         </div>
         <div>
           <strong className="text-sm font-bold font-display text-white tracking-tight block">
-            StockTrail Pro
+            Stock Management
           </strong>
           <span className="text-[10px] text-emerald-300/70 font-semibold tracking-wider uppercase block">
             Event Operations Suite

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { RepairWorkOrder, RentalReservation } from "../../types";
 import { useApp } from "../../context/AppContext";
 import Icon from "../common/Icons";
@@ -19,8 +19,31 @@ export const MaintenanceView: React.FC = () => {
   const [isWorkOrderModalOpen, setIsWorkOrderModalOpen] = useState(false);
   const [workOrderToEdit, setWorkOrderToEdit] = useState<RepairWorkOrder | null>(null);
   const [workOrderToRestock, setWorkOrderToRestock] = useState<RepairWorkOrder | null>(null);
+  const [rentalToRestock, setRentalToRestock] = useState<RentalReservation | null>(null);
+
+  // Maintained orders sub-filter & search
+  const [maintainedFilter, setMaintainedFilter] = useState<"all" | "awaiting" | "restocked">("all");
+  const [maintainedSearch, setMaintainedSearch] = useState<string>("");
 
   const activeRentalsToReturn = rentals.filter((r) => r.status === "Active" || r.status === "Overdue");
+  const restockedRentals = rentals.filter((r) => r.status === "Returned");
+  const allMaintainedRentals = rentals.filter((r) => r.status === "Active" || r.status === "Overdue" || r.status === "Returned");
+
+  const filteredMaintainedRentals = useMemo(() => {
+    return allMaintainedRentals.filter((r) => {
+      if (maintainedFilter === "awaiting" && r.status === "Returned") return false;
+      if (maintainedFilter === "restocked" && r.status !== "Returned") return false;
+
+      if (!maintainedSearch.trim()) return true;
+      const q = maintainedSearch.toLowerCase();
+      return (
+        r.reservationNumber.toLowerCase().includes(q) ||
+        r.customerName.toLowerCase().includes(q) ||
+        r.items.some((i) => i.materialName.toLowerCase().includes(q) || i.materialCode.toLowerCase().includes(q))
+      );
+    });
+  }, [allMaintainedRentals, maintainedFilter, maintainedSearch]);
+
   const totalRepairCost = workOrders.reduce((acc, wo) => acc + wo.totalCost, 0);
   const itemsUnderRepairCount = materials.reduce((acc, m) => acc + m.underRepair, 0);
 
@@ -99,12 +122,14 @@ export const MaintenanceView: React.FC = () => {
 
         <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200/80 shadow-2xs">
           <span className="text-[10px] text-emerald-800 font-bold uppercase tracking-wider block">
-            MAINTENANCE EXPENSE
+            MAINTAINED ORDERS AWAITING RESTOCK
           </span>
           <strong className="text-2xl font-bold text-emerald-950 font-display mt-1 block">
-            ${totalRepairCost.toLocaleString()}
+            {activeRentalsToReturn.length} Orders
           </strong>
-          <span className="text-[11px] text-emerald-700 mt-1 block font-semibold">-8.4% vs May budget</span>
+          <span className="text-[11px] text-emerald-700 mt-1 block font-semibold">
+            {restockedRentals.length} successfully restocked
+          </span>
         </div>
       </div>
 
@@ -118,7 +143,7 @@ export const MaintenanceView: React.FC = () => {
             }`}
           >
             <Icon name="wrench" size={14} />
-            Maintained Orders ({workOrders.length})
+            Repair Work Orders ({workOrders.length})
           </button>
           <button
             onClick={() => setActiveTab("damage")}
@@ -135,13 +160,13 @@ export const MaintenanceView: React.FC = () => {
               activeTab === "returns" ? "bg-emerald-950 text-white shadow-xs" : "bg-gray-100 text-gray-600 hover:text-gray-900"
             }`}
           >
-            <Icon name="check" size={14} />
-            Check-In Desk ({activeRentalsToReturn.length} Active Rentals)
+            <Icon name="box" size={14} />
+            Maintained Orders ({activeRentalsToReturn.length})
           </button>
         </div>
       </div>
 
-      {/* Content */}
+      {/* Tab 1: Repair Work Orders */}
       {activeTab === "orders" && (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
@@ -218,7 +243,10 @@ export const MaintenanceView: React.FC = () => {
                           <>
                             {wo.status !== "Completed" ? (
                               <button
-                                onClick={() => setWorkOrderToRestock(wo)}
+                                onClick={() => {
+                                  setRentalToRestock(null);
+                                  setWorkOrderToRestock(wo);
+                                }}
                                 className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-white bg-emerald-950 hover:bg-emerald-900 rounded-md transition-colors shadow-2xs"
                                 title="Restock this equipment back to inventory and select its condition"
                               >
@@ -252,6 +280,7 @@ export const MaintenanceView: React.FC = () => {
         </div>
       )}
 
+      {/* Tab 2: Damage Reports */}
       {activeTab === "damage" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {damageReports.map((claim) => (
@@ -311,43 +340,183 @@ export const MaintenanceView: React.FC = () => {
         </div>
       )}
 
+      {/* Tab 3: Maintained Orders (formerly Check-In Desk) */}
       {activeTab === "returns" && (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
-          <div className="p-4 bg-emerald-50/50 border-b border-emerald-100 flex items-center justify-between text-xs text-emerald-950">
-            <span className="font-bold">Receiving Desk: Active & Overdue Rentals Awaiting Return Check-In</span>
-            <span className="text-gray-500">{activeRentalsToReturn.length} active events</span>
+        <div className="space-y-4">
+          {/* Maintained Orders Controls */}
+          <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+              <button
+                onClick={() => setMaintainedFilter("all")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                  maintainedFilter === "all"
+                    ? "bg-emerald-950 text-white shadow-xs"
+                    : "bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                }`}
+              >
+                All Maintained Orders ({allMaintainedRentals.length})
+              </button>
+              <button
+                onClick={() => setMaintainedFilter("awaiting")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                  maintainedFilter === "awaiting"
+                    ? "bg-emerald-950 text-white shadow-xs"
+                    : "bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                }`}
+              >
+                Awaiting Restock
+                <span className="px-1.5 py-0.2 bg-amber-500 text-white rounded-full text-[10px]">
+                  {activeRentalsToReturn.length}
+                </span>
+              </button>
+              <button
+                onClick={() => setMaintainedFilter("restocked")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                  maintainedFilter === "restocked"
+                    ? "bg-emerald-950 text-white shadow-xs"
+                    : "bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                }`}
+              >
+                Restocked in Inventory
+                <span className="px-1.5 py-0.2 bg-emerald-700 text-white rounded-full text-[10px]">
+                  {restockedRentals.length}
+                </span>
+              </button>
+            </div>
+
+            <div className="relative w-full md:w-72">
+              <input
+                type="text"
+                placeholder="Search order #, customer, gear..."
+                value={maintainedSearch}
+                onChange={(e) => setMaintainedSearch(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-emerald-900 outline-none"
+              />
+              <div className="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-gray-400">
+                <Icon name="search" size={13} />
+              </div>
+            </div>
           </div>
 
-          <div className="divide-y divide-gray-100">
-            {activeRentalsToReturn.map((rent) => (
-              <div key={rent.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <strong className="text-sm font-bold text-gray-900">{rent.reservationNumber}</strong>
-                    <Badge tone={rent.isOverdue ? "red" : "yellow"} size="sm">
-                      {rent.status}
-                    </Badge>
-                  </div>
-                  <p className="text-gray-600 mt-0.5">
-                    Customer: <strong>{rent.customerName}</strong> · Expected: {rent.expectedReturnDate.replace("T", " ")}
-                  </p>
-                  <span className="text-[11px] text-gray-400">
-                    Cargo: {rent.items.map((i) => `${i.quantity}x ${i.materialName}`).join(", ")}
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => setReturnRental(rent)}
-                  className="px-4 py-2 text-xs font-bold text-white bg-emerald-950 hover:bg-emerald-900 rounded-xl transition-colors shadow-xs"
-                >
-                  Start Return Check-In & Checklist
-                </button>
+          {/* Maintained Orders Table */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
+            <div className="p-4 bg-emerald-50/50 border-b border-emerald-100 flex items-center justify-between text-xs text-emerald-950">
+              <div>
+                <strong className="font-bold block">Maintained Orders & Inventory Receiving Desk</strong>
+                <span className="text-[11px] text-emerald-800">
+                  Inspect equipment condition and certify gear to return back to available inventory.
+                </span>
               </div>
-            ))}
+              <span className="text-gray-500 font-semibold">{filteredMaintainedRentals.length} orders shown</span>
+            </div>
 
-            {!activeRentalsToReturn.length && (
-              <p className="py-12 text-center text-gray-400 italic">No active rentals currently awaiting check-in.</p>
-            )}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-gray-50/80 border-b border-gray-200 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+                  <tr>
+                    <th className="py-3 px-4">Order / Reservation #</th>
+                    <th className="py-3 px-3">Customer & Contact</th>
+                    <th className="py-3 px-3">Expected Return</th>
+                    <th className="py-3 px-3">Cargo Items</th>
+                    <th className="py-3 px-3">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredMaintainedRentals.map((rent) => (
+                    <tr key={rent.id} className="hover:bg-emerald-50/20 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-gray-900">
+                        {rent.reservationNumber}
+                        <span className="text-[10px] text-gray-400 font-sans block font-normal">
+                          {rent.contractNumber || "Standard Contract"}
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-3">
+                        <strong className="text-gray-900 block font-bold">{rent.customerName}</strong>
+                        <span className="text-[10px] text-gray-500">{rent.customerPhone}</span>
+                      </td>
+
+                      <td className="py-3.5 px-3">
+                        <span className="font-medium text-gray-900 block">
+                          {rent.expectedReturnDate.replace("T", " ")}
+                        </span>
+                        {rent.isOverdue && (
+                          <span className="text-[10px] font-bold text-rose-700 block">
+                            Overdue by {rent.overdueDays || 1} day(s)
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-3">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {rent.items.map((i) => (
+                            <span
+                              key={i.materialId}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-800 rounded-md text-[10px] font-medium"
+                            >
+                              <strong className="text-emerald-950 font-bold">{i.quantity}x</strong> {i.materialName}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-3">
+                        {rent.status === "Returned" ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-200">
+                            <Icon name="check" size={10} /> Restocked
+                          </span>
+                        ) : (
+                          <Badge tone={rent.isOverdue ? "red" : "yellow"} size="sm">
+                            {rent.status}
+                          </Badge>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {rent.status !== "Returned" ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setWorkOrderToRestock(null);
+                                  setRentalToRestock(rent);
+                                }}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-emerald-950 hover:bg-emerald-900 rounded-lg transition-colors shadow-2xs"
+                                title="Restock this maintained order back to available inventory and select material condition"
+                              >
+                                <Icon name="box" size={13} />
+                                Back to Inventory
+                              </button>
+                              <button
+                                onClick={() => setReturnRental(rent)}
+                                className="px-2.5 py-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                                title="Run full checklist inspection"
+                              >
+                                Checklist
+                              </button>
+                            </>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg">
+                              <Icon name="check" size={12} />
+                              In Stock
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {!filteredMaintainedRentals.length && (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-gray-400 italic">
+                        No maintained orders match the selected filter.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -370,10 +539,15 @@ export const MaintenanceView: React.FC = () => {
         orderToUpdate={workOrderToEdit}
       />
 
+      {/* Reusable Back to Inventory Modal with Condition Selection */}
       <BackToInventoryModal
-        isOpen={!!workOrderToRestock}
-        onClose={() => setWorkOrderToRestock(null)}
+        isOpen={!!workOrderToRestock || !!rentalToRestock}
+        onClose={() => {
+          setWorkOrderToRestock(null);
+          setRentalToRestock(null);
+        }}
         workOrder={workOrderToRestock}
+        rentalOrder={rentalToRestock}
       />
     </div>
   );

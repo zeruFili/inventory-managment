@@ -46,7 +46,8 @@ export const MaterialPickerModal: React.FC<MaterialPickerModalProps> = ({
   subtitle,
   badge,
 }) => {
-  const { materials, checkMaterialAvailability, showToast } = useApp();
+  const { materials, checkMaterialAvailability, showToast, currentUser } = useApp();
+  const isStockManager = currentUser.role === "stock_manager";
 
   // Local state of selected items mapped by materialId -> quantity
   const [tempSelection, setTempSelection] = useState<Record<string, number>>({});
@@ -510,13 +511,15 @@ export const MaterialPickerModal: React.FC<MaterialPickerModalProps> = ({
                       <th className="py-3 px-3 text-center">
                         {mode === "rental" ? "Date Avail" : "Stock Avail"}
                       </th>
-                      <th className="py-3 px-3">
-                        {mode === "sales"
-                          ? "Selling Price"
-                          : mode === "billing"
-                          ? "Replacement Value"
-                          : "Daily Rate"}
-                      </th>
+                      {!isStockManager && (
+                        <th className="py-3 px-3">
+                          {mode === "sales"
+                            ? "Selling Price"
+                            : mode === "billing"
+                            ? "Replacement Value"
+                            : "Daily Rate"}
+                        </th>
+                      )}
                       <th className="py-3 px-3">Condition</th>
                       <th className="py-3 px-4 text-right">Selection</th>
                     </tr>
@@ -577,13 +580,15 @@ export const MaterialPickerModal: React.FC<MaterialPickerModalProps> = ({
                             )}
                           </td>
 
-                          <td className="py-3 px-3 font-bold text-gray-900 font-display">
-                            {mode === "sales"
-                              ? `$${mat.sellingPrice}`
-                              : mode === "billing"
-                              ? `$${mat.replacementValue || mat.purchaseCost}`
-                              : `$${mat.rentalPriceDaily}/d`}
-                          </td>
+                          {!isStockManager && (
+                            <td className="py-3 px-3 font-bold text-gray-900 font-display">
+                              {mode === "sales"
+                                ? `$${mat.sellingPrice}`
+                                : mode === "billing"
+                                ? `$${mat.replacementValue || mat.purchaseCost}`
+                                : `$${mat.rentalPriceDaily}/d`}
+                            </td>
+                          )}
 
                           <td className="py-3 px-3">
                             <Badge
@@ -711,13 +716,15 @@ export const MaterialPickerModal: React.FC<MaterialPickerModalProps> = ({
                           <span className="text-[9px] font-bold text-emerald-800 uppercase tracking-wider">
                             {mat.category}
                           </span>
-                          <span className="text-xs font-bold text-gray-900 font-display">
-                            {mode === "sales"
-                              ? `$${mat.sellingPrice}`
-                              : mode === "billing"
-                              ? `$${mat.replacementValue || mat.purchaseCost}`
-                              : `$${mat.rentalPriceDaily}/day`}
-                          </span>
+                          {!isStockManager && (
+                            <span className="text-xs font-bold text-gray-900 font-display">
+                              {mode === "sales"
+                                ? `$${mat.sellingPrice}`
+                                : mode === "billing"
+                                ? `$${mat.replacementValue || mat.purchaseCost}`
+                                : `$${mat.rentalPriceDaily}/day`}
+                            </span>
+                          )}
                         </div>
 
                         <h4 className="text-xs font-bold text-gray-900 line-clamp-1">{mat.name}</h4>
@@ -804,13 +811,15 @@ export const MaterialPickerModal: React.FC<MaterialPickerModalProps> = ({
                 <strong className="text-xs font-bold text-gray-900 block">
                   {selectedCount} material type{selectedCount === 1 ? "" : "s"} ({totalUnitsSelected} total units)
                 </strong>
-                <span className="text-[11px] text-gray-500">
-                  {mode === "sales"
-                    ? `Estimated subtotal: $${estimatedValue.toLocaleString()}`
-                    : mode === "billing"
-                    ? `Total valuation: $${estimatedValue.toLocaleString()}`
-                    : `Daily rate sum: $${estimatedValue.toLocaleString()}/day`}
-                </span>
+                {!isStockManager && (
+                  <span className="text-[11px] text-gray-500">
+                    {mode === "sales"
+                      ? `Estimated subtotal: $${estimatedValue.toLocaleString()}`
+                      : mode === "billing"
+                      ? `Total valuation: $${estimatedValue.toLocaleString()}`
+                      : `Daily rate sum: $${estimatedValue.toLocaleString()}/day`}
+                  </span>
+                )}
               </div>
             </div>
 

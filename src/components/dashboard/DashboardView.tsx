@@ -21,6 +21,8 @@ export const DashboardView: React.FC<{
     showToast,
   } = useApp();
 
+  const isStockManager = currentUser.role === "stock_manager";
+
   const [dashboardMode, setDashboardMode] = useState<"operational" | "executive">(
     currentUser.role === "general_management" ? "executive" : "operational"
   );
@@ -167,162 +169,164 @@ export const DashboardView: React.FC<{
           </div>
 
           {/* Middle Layout: Revenue Trend + Schedule */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Revenue Overview chart */}
-            <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs flex flex-col justify-between">
-              <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-                <div>
-                  <h2 className="text-base font-bold text-gray-900 font-display">Revenue Overview</h2>
-                  <p className="text-xs text-gray-500">Sales vs Rental income performance</p>
-                </div>
-                <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg text-xs">
-                  <button
-                    onClick={() => setPeriod("7days")}
-                    className={`px-2.5 py-1 rounded-md font-medium ${
-                      period === "7days" ? "bg-white text-gray-900 shadow-2xs font-semibold" : "text-gray-500"
-                    }`}
-                  >
-                    7 Days
-                  </button>
-                  <button
-                    onClick={() => setPeriod("month")}
-                    className={`px-2.5 py-1 rounded-md font-medium ${
-                      period === "month" ? "bg-white text-gray-900 shadow-2xs font-semibold" : "text-gray-500"
-                    }`}
-                  >
-                    This Month
-                  </button>
-                  <button
-                    onClick={() => setPeriod("year")}
-                    className={`px-2.5 py-1 rounded-md font-medium ${
-                      period === "year" ? "bg-white text-gray-900 shadow-2xs font-semibold" : "text-gray-500"
-                    }`}
-                  >
-                    This Year
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-baseline justify-between my-5">
-                <div>
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                    TOTAL CASH COLLECTED
-                  </span>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <span className="text-3xl font-extrabold text-gray-900 font-display">
-                      ${(totalRentalRevenue + totalSalesRevenue).toLocaleString()}
-                    </span>
-                    <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      ↑ 18.2% vs previous
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-800" /> Rental ($
-                    {totalRentalRevenue.toLocaleString()})
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-amber-400" /> Sales ($
-                    {totalSalesRevenue.toLocaleString()})
-                  </span>
-                </div>
-              </div>
-
-              {/* Bar Chart Visual */}
-              <div className="h-44 pt-4 flex items-end justify-between gap-3 border-t border-gray-100">
-                {[
-                  { month: "Jan", rental: 45, sales: 30 },
-                  { month: "Feb", rental: 58, sales: 40 },
-                  { month: "Mar", rental: 52, sales: 38 },
-                  { month: "Apr", rental: 72, sales: 48 },
-                  { month: "May", rental: 85, sales: 62 },
-                  { month: "Jun", rental: 94, sales: 70 },
-                ].map((item) => (
-                  <div key={item.month} className="flex-1 flex flex-col items-center gap-2 group">
-                    <div className="w-full flex items-end justify-center gap-1.5 h-32">
-                      <div
-                        style={{ height: `${item.rental}%` }}
-                        className="w-3.5 bg-emerald-800 rounded-t-sm transition-all duration-300 group-hover:bg-emerald-900"
-                        title={`Rental: ${item.rental}%`}
-                      />
-                      <div
-                        style={{ height: `${item.sales}%` }}
-                        className="w-3.5 bg-amber-400 rounded-t-sm transition-all duration-300 group-hover:bg-amber-500"
-                        title={`Sales: ${item.sales}%`}
-                      />
-                    </div>
-                    <span className="text-[11px] font-medium text-gray-500">{item.month}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Upcoming Client Reservations & Dispatches */}
-            <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          {!isStockManager && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Revenue Overview chart */}
+              <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between pb-4 border-b border-gray-100">
                   <div>
-                    <h2 className="text-base font-bold text-gray-900 font-display">Client Reservations & Dispatches</h2>
-                    <p className="text-xs text-gray-500">Upcoming rental bookings and equipment dispatches</p>
+                    <h2 className="text-base font-bold text-gray-900 font-display">Revenue Overview</h2>
+                    <p className="text-xs text-gray-500">Sales vs Rental income performance</p>
                   </div>
-                  <button
-                    onClick={() => onNavigate("Rentals")}
-                    className="text-xs font-semibold text-emerald-800 hover:text-emerald-900 flex items-center gap-1"
-                  >
-                    View All <Icon name="arrow" size={12} />
-                  </button>
+                  <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg text-xs">
+                    <button
+                      onClick={() => setPeriod("7days")}
+                      className={`px-2.5 py-1 rounded-md font-medium ${
+                        period === "7days" ? "bg-white text-gray-900 shadow-2xs font-semibold" : "text-gray-500"
+                      }`}
+                    >
+                      7 Days
+                    </button>
+                    <button
+                      onClick={() => setPeriod("month")}
+                      className={`px-2.5 py-1 rounded-md font-medium ${
+                        period === "month" ? "bg-white text-gray-900 shadow-2xs font-semibold" : "text-gray-500"
+                      }`}
+                    >
+                      This Month
+                    </button>
+                    <button
+                      onClick={() => setPeriod("year")}
+                      className={`px-2.5 py-1 rounded-md font-medium ${
+                        period === "year" ? "bg-white text-gray-900 shadow-2xs font-semibold" : "text-gray-500"
+                      }`}
+                    >
+                      This Year
+                    </button>
+                  </div>
                 </div>
 
-                <div className="divide-y divide-gray-100 mt-2">
-                  {rentals.slice(0, 4).map((rent) => (
-                    <div key={rent.id} className="py-3 flex items-start justify-between gap-3">
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200/60">
-                          <Icon name="calendar" size={16} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <strong className="text-xs font-bold text-gray-900">{rent.customerName}</strong>
-                            <Badge
-                              tone={
-                                rent.status === "Active"
-                                  ? "green"
-                                  : rent.status === "Confirmed"
-                                  ? "yellow"
-                                  : rent.status === "Overdue"
-                                  ? "red"
-                                  : "gray"
-                              }
-                              size="sm"
-                            >
-                              {rent.status}
-                            </Badge>
-                          </div>
-                          <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
-                            {rent.items.length} material lines · {rent.reservationNumber}
-                          </p>
-                          <span className="text-[10px] text-gray-400 font-medium font-mono">
-                            {rent.startDate.slice(0, 10)} → {rent.expectedReturnDate.slice(0, 10)}
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-[11px] font-bold text-gray-700 bg-gray-50 px-2 py-1 rounded-md border border-gray-200/60 shrink-0 font-display">
-                        ${rent.totalCost.toLocaleString()}
+                <div className="flex items-baseline justify-between my-5">
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                      TOTAL CASH COLLECTED
+                    </span>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-3xl font-extrabold text-gray-900 font-display">
+                        ${(totalRentalRevenue + totalSalesRevenue).toLocaleString()}
                       </span>
+                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        ↑ 18.2% vs previous
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-sm bg-emerald-800" /> Rental ($
+                      {totalRentalRevenue.toLocaleString()})
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-sm bg-amber-400" /> Sales ($
+                      {totalSalesRevenue.toLocaleString()})
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bar Chart Visual */}
+                <div className="h-44 pt-4 flex items-end justify-between gap-3 border-t border-gray-100">
+                  {[
+                    { month: "Jan", rental: 45, sales: 30 },
+                    { month: "Feb", rental: 58, sales: 40 },
+                    { month: "Mar", rental: 52, sales: 38 },
+                    { month: "Apr", rental: 72, sales: 48 },
+                    { month: "May", rental: 85, sales: 62 },
+                    { month: "Jun", rental: 94, sales: 70 },
+                  ].map((item) => (
+                    <div key={item.month} className="flex-1 flex flex-col items-center gap-2 group">
+                      <div className="w-full flex items-end justify-center gap-1.5 h-32">
+                        <div
+                          style={{ height: `${item.rental}%` }}
+                          className="w-3.5 bg-emerald-800 rounded-t-sm transition-all duration-300 group-hover:bg-emerald-900"
+                          title={`Rental: ${item.rental}%`}
+                        />
+                        <div
+                          style={{ height: `${item.sales}%` }}
+                          className="w-3.5 bg-amber-400 rounded-t-sm transition-all duration-300 group-hover:bg-amber-500"
+                          title={`Sales: ${item.sales}%`}
+                        />
+                      </div>
+                      <span className="text-[11px] font-medium text-gray-500">{item.month}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <button
-                onClick={() => onNavigate("Rentals")}
-                className="w-full mt-4 py-2.5 px-3 bg-emerald-50/70 hover:bg-emerald-100 text-emerald-900 border border-emerald-200/80 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
-              >
-                <Icon name="calendar" size={14} /> View All Rental Reservations
-              </button>
+              {/* Upcoming Client Reservations & Dispatches */}
+              <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-gray-200 shadow-2xs flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                    <div>
+                      <h2 className="text-base font-bold text-gray-900 font-display">Client Reservations & Dispatches</h2>
+                      <p className="text-xs text-gray-500">Upcoming rental bookings and equipment dispatches</p>
+                    </div>
+                    <button
+                      onClick={() => onNavigate("Rentals")}
+                      className="text-xs font-semibold text-emerald-800 hover:text-emerald-900 flex items-center gap-1"
+                    >
+                      View All <Icon name="arrow" size={12} />
+                    </button>
+                  </div>
+
+                  <div className="divide-y divide-gray-100 mt-2">
+                    {rentals.slice(0, 4).map((rent) => (
+                      <div key={rent.id} className="py-3 flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200/60">
+                            <Icon name="calendar" size={16} />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <strong className="text-xs font-bold text-gray-900">{rent.customerName}</strong>
+                              <Badge
+                                tone={
+                                  rent.status === "Active"
+                                    ? "green"
+                                    : rent.status === "Confirmed"
+                                    ? "yellow"
+                                    : rent.status === "Overdue"
+                                    ? "red"
+                                    : "gray"
+                                }
+                                size="sm"
+                              >
+                                {rent.status}
+                              </Badge>
+                            </div>
+                            <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
+                              {rent.items.length} material lines · {rent.reservationNumber}
+                            </p>
+                            <span className="text-[10px] text-gray-400 font-medium font-mono">
+                              {rent.startDate.slice(0, 10)} → {rent.expectedReturnDate.slice(0, 10)}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[11px] font-bold text-gray-700 bg-gray-50 px-2 py-1 rounded-md border border-gray-200/60 shrink-0 font-display">
+                          ${rent.totalCost.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => onNavigate("Rentals")}
+                  className="w-full mt-4 py-2.5 px-3 bg-emerald-50/70 hover:bg-emerald-100 text-emerald-900 border border-emerald-200/80 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <Icon name="calendar" size={14} /> View All Rental Reservations
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Lower Grid: Needs Attention + Stock Snapshot */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -475,12 +479,18 @@ export const DashboardView: React.FC<{
                       <p className="text-[11px] text-emerald-800 mt-0.5">
                         {underRepairCount} items currently under maintenance / inspection hold.
                       </p>
-                      <button
-                        onClick={() => onNavigate("Maintenance")}
-                        className="mt-2 text-[10px] font-bold text-emerald-900 underline hover:text-emerald-950 block"
-                      >
-                        Open maintenance queue →
-                      </button>
+                      {!isStockManager ? (
+                        <button
+                          onClick={() => onNavigate("Maintenance")}
+                          className="mt-2 text-[10px] font-bold text-emerald-900 underline hover:text-emerald-950 block"
+                        >
+                          Open maintenance queue →
+                        </button>
+                      ) : (
+                        <span className="mt-1 text-[10px] text-emerald-700/80 block">
+                          Tracked via equipment status in Inventory
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

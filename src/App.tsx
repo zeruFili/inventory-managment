@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppProvider, useApp } from "./context/AppContext";
 import Sidebar from "./components/common/Sidebar";
 import Topbar from "./components/common/Topbar";
@@ -17,9 +17,29 @@ import MaterialModal from "./components/inventory/MaterialModal";
 import RentalReservationModal from "./components/rentals/RentalReservationModal";
 
 function AppContent() {
-  const { toast } = useApp();
+  const { toast, currentUser } = useApp();
   const [activeModule, setActiveModule] = useState<string>("Dashboard");
   const [globalSearch, setGlobalSearch] = useState<string>("");
+
+  const isStockManager = currentUser.role === "stock_manager";
+
+  // Prevent stock manager from accessing restricted modules
+  useEffect(() => {
+    if (isStockManager) {
+      const restrictedModules = [
+        "Customers",
+        "Suppliers",
+        "Sales",
+        "Billing",
+        "Maintenance",
+        "Reports",
+        "Users",
+      ];
+      if (restrictedModules.includes(activeModule)) {
+        setActiveModule("Dashboard");
+      }
+    }
+  }, [isStockManager, activeModule]);
 
   // Global Quick Modals
   const [isAddMaterialOpen, setIsAddMaterialOpen] = useState<boolean>(false);
@@ -50,19 +70,19 @@ function AppContent() {
 
           {activeModule === "Rentals" && <RentalsView />}
 
-          {activeModule === "Customers" && <CustomersView />}
+          {activeModule === "Customers" && !isStockManager && <CustomersView />}
 
-          {activeModule === "Suppliers" && <SuppliersView />}
+          {activeModule === "Suppliers" && !isStockManager && <SuppliersView />}
 
-          {activeModule === "Sales" && <SalesView />}
+          {activeModule === "Sales" && !isStockManager && <SalesView />}
 
-          {activeModule === "Billing" && <BillingView />}
+          {activeModule === "Billing" && !isStockManager && <BillingView />}
 
-          {activeModule === "Maintenance" && <MaintenanceView />}
+          {activeModule === "Maintenance" && !isStockManager && <MaintenanceView />}
 
-          {activeModule === "Reports" && <ReportsView />}
+          {activeModule === "Reports" && !isStockManager && <ReportsView />}
 
-          {activeModule === "Users" && <UsersRolesView />}
+          {activeModule === "Users" && !isStockManager && <UsersRolesView />}
         </main>
       </div>
 

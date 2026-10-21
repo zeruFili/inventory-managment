@@ -34,6 +34,8 @@ export const RentalReservationModal: React.FC<RentalReservationModalProps> = ({
   const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [notes, setNotes] = useState<string>("Corporate banquet setup.");
 
+  const isStockManager = currentUser.role === "stock_manager";
+
   // Multi-item lines
   const [selectedItems, setSelectedItems] = useState<
     { materialId: string; quantity: number }[]
@@ -229,7 +231,9 @@ export const RentalReservationModal: React.FC<RentalReservationModalProps> = ({
               onChange={(e) => setDeliveryType(e.target.value as any)}
               className="w-full text-xs font-medium border border-gray-300 rounded-lg p-2 bg-white text-gray-900 outline-none"
             >
-              <option value="Delivery & Collection">Delivery & Collection (+ $150 transport)</option>
+              <option value="Delivery & Collection">
+                {isStockManager ? "Delivery & Collection" : "Delivery & Collection (+ $150 transport)"}
+              </option>
               <option value="Customer Pickup">Customer Pickup at Central Warehouse</option>
             </select>
           </div>
@@ -261,40 +265,42 @@ export const RentalReservationModal: React.FC<RentalReservationModalProps> = ({
         </div>
 
         {/* Financials & Billing Details */}
-        <div className="bg-emerald-50/40 p-4 rounded-xl border border-emerald-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Rental Subtotal</span>
-            <strong className="text-sm font-bold text-gray-900">${subtotal}</strong>
-          </div>
+        {!isStockManager && (
+          <div className="bg-emerald-50/40 p-4 rounded-xl border border-emerald-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase font-bold block">Rental Subtotal</span>
+              <strong className="text-sm font-bold text-gray-900">${subtotal}</strong>
+            </div>
 
-          <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Security Deposit (Held)</span>
-            <input
-              type="number"
-              min="0"
-              value={depositAmount}
-              onChange={(e) => setDepositAmount(Number(e.target.value))}
-              className="w-24 text-xs font-bold border border-gray-300 rounded p-1 bg-white"
-            />
-          </div>
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase font-bold block">Security Deposit (Held)</span>
+              <input
+                type="number"
+                min="0"
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(Number(e.target.value))}
+                className="w-24 text-xs font-bold border border-gray-300 rounded p-1 bg-white"
+              />
+            </div>
 
-          <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Advance Payment Received</span>
-            <input
-              type="number"
-              min="0"
-              value={amountPaid}
-              onChange={(e) => setAmountPaid(Number(e.target.value))}
-              className="w-24 text-xs font-bold border border-gray-300 rounded p-1 bg-white text-emerald-800"
-            />
-          </div>
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase font-bold block">Advance Payment Received</span>
+              <input
+                type="number"
+                min="0"
+                value={amountPaid}
+                onChange={(e) => setAmountPaid(Number(e.target.value))}
+                className="w-24 text-xs font-bold border border-gray-300 rounded p-1 bg-white text-emerald-800"
+              />
+            </div>
 
-          <div>
-            <span className="text-[10px] text-gray-500 uppercase font-bold block">Estimated Total Cost</span>
-            <strong className="text-base font-extrabold text-emerald-950 font-display">${totalCost}</strong>
-            <span className="text-[10px] text-gray-500 block">Balance: ${outstandingBalance}</span>
+            <div>
+              <span className="text-[10px] text-gray-500 uppercase font-bold block">Estimated Total Cost</span>
+              <strong className="text-base font-extrabold text-emerald-950 font-display">${totalCost}</strong>
+              <span className="text-[10px] text-gray-500 block">Balance: ${outstandingBalance}</span>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
           <button

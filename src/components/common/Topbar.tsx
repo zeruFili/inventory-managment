@@ -16,6 +16,8 @@ export const Topbar: React.FC<TopbarProps> = ({ onSearch, onOpenNewRental }) => 
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const isStockManager = currentUser.role === "stock_manager";
+
   const overdueCount = rentals.filter((r) => r.isOverdue || r.status === "Overdue").length;
   const lowStockCount = materials.filter((m) => m.physicallyAvailable <= m.lowStockThreshold).length;
 
@@ -40,7 +42,11 @@ export const Topbar: React.FC<TopbarProps> = ({ onSearch, onOpenNewRental }) => 
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="Global search materials, reservations, customers, invoices..."
+          placeholder={
+            isStockManager
+              ? "Global search materials, inventory stock, reservations..."
+              : "Global search materials, reservations, customers, invoices..."
+          }
           className="w-full text-xs font-medium pl-9 pr-12 py-2 border border-gray-200 rounded-xl bg-gray-50/60 text-gray-900 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
         />
         <kbd className="absolute right-2.5 top-2 text-[9px] font-mono text-gray-400 bg-white border border-gray-200 px-1.5 py-0.5 rounded">

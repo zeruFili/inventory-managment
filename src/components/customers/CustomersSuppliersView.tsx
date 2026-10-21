@@ -26,7 +26,6 @@ export const CustomersSuppliersView: React.FC = () => {
     return customers.filter((c) => {
       if (customerFilter === "Companies" && c.type !== "Company") return false;
       if (customerFilter === "Individuals" && c.type !== "Individual") return false;
-      if (customerFilter === "With Balance" && c.currentBalance <= 0) return false;
       if (customerFilter === "VIP" && c.status !== "VIP") return false;
 
       const q = search.toLowerCase();
@@ -129,7 +128,7 @@ export const CustomersSuppliersView: React.FC = () => {
 
           {activeSection === "customers" && (
             <div className="flex items-center gap-1 overflow-x-auto pb-1">
-              {["All", "Companies", "Individuals", "With Balance", "VIP"].map((f) => (
+              {["All", "Companies", "Individuals", "VIP"].map((f) => (
                 <button
                   key={f}
                   onClick={() => setCustomerFilter(f)}

@@ -25,7 +25,7 @@ const AVAILABLE_ROLES: Array<{
   {
     role: "general_management",
     title: "General Management",
-    scopeSummary: "Executive overview, P&L reports, write-off approvals & verbal agreements",
+    scopeSummary: "Executive overview, P&L reports, write-off approvals & financial settlements",
     tone: "yellow",
   },
   {

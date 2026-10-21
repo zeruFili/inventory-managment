@@ -153,11 +153,6 @@ export const CustomerProfileDrawer: React.FC<CustomerProfileDrawerProps> = ({
                         <Badge tone={inv.paymentStatus === "Paid" ? "green" : "red"} size="sm">
                           {inv.paymentStatus}
                         </Badge>
-                        {inv.isVerbalAgreement && (
-                          <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded">
-                            Verbal Agreement
-                          </span>
-                        )}
                       </div>
                       <p className="text-[11px] text-gray-500 mt-0.5">
                         Due: {inv.dueDate} · Ref: {inv.relatedReference}

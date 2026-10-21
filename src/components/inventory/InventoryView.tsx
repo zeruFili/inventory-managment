@@ -4,8 +4,6 @@ import { useApp } from "../../context/AppContext";
 import Icon from "../common/Icons";
 import Badge from "../common/Badge";
 import MaterialModal from "./MaterialModal";
-import StockMovementModal from "./StockMovementModal";
-import StockHistoryDrawer from "./StockHistoryDrawer";
 import CategoryBrowser from "./CategoryBrowser";
 import ModelGroupOverviewModal from "./ModelGroupOverviewModal";
 import IndividualUnitsView from "./IndividualUnitsView";
@@ -28,9 +26,6 @@ export const InventoryView: React.FC = () => {
   // Modals state
   const [isAddEditOpen, setIsAddEditOpen] = useState(false);
   const [materialToEdit, setMaterialToEdit] = useState<Material | null>(null);
-  const [isMovementOpen, setIsMovementOpen] = useState(false);
-  const [movementMaterial, setMovementMaterial] = useState<Material | null>(null);
-  const [historyMaterial, setHistoryMaterial] = useState<Material | null>(null);
 
   const categories = [
     "All",
@@ -79,11 +74,6 @@ export const InventoryView: React.FC = () => {
   const handleAdd = () => {
     setMaterialToEdit(null);
     setIsAddEditOpen(true);
-  };
-
-  const handleOpenMovement = (mat?: Material) => {
-    setMovementMaterial(mat || null);
-    setIsMovementOpen(true);
   };
 
   const handleArchive = (mat: Material) => {
@@ -191,22 +181,13 @@ export const InventoryView: React.FC = () => {
           </div>
 
           {can("manage_inventory") && (
-            <>
-              <button
-                onClick={() => handleOpenMovement()}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-950 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-2xs"
-              >
-                <Icon name="refresh" size={14} />
-                Stock Movement
-              </button>
-              <button
-                onClick={handleAdd}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-emerald-950 rounded-lg hover:bg-emerald-900 transition-colors shadow-xs"
-              >
-                <Icon name="plus" size={14} />
-                Add Material
-              </button>
-            </>
+            <button
+              onClick={handleAdd}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-emerald-950 rounded-lg hover:bg-emerald-900 transition-colors shadow-xs"
+            >
+              <Icon name="plus" size={14} />
+              Add Material
+            </button>
           )}
         </div>
       </div>
@@ -506,23 +487,8 @@ export const InventoryView: React.FC = () => {
                               <span>Units</span>
                             </button>
 
-                            <button
-                              onClick={() => setHistoryMaterial(mat)}
-                              className="p-1.5 text-gray-400 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition-colors"
-                              title="View Movement History"
-                            >
-                              <Icon name="clock" size={14} />
-                            </button>
-
                             {can("manage_inventory") && (
                               <>
-                                <button
-                                  onClick={() => handleOpenMovement(mat)}
-                                  className="p-1.5 text-gray-400 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition-colors"
-                                  title="Stock Movement"
-                                >
-                                  <Icon name="refresh" size={14} />
-                                </button>
                                 <button
                                   onClick={() => handleEdit(mat)}
                                   className="p-1.5 text-gray-400 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition-colors"
@@ -658,13 +624,6 @@ export const InventoryView: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => setHistoryMaterial(mat)}
-                        className="p-1.5 text-gray-500 hover:text-emerald-800 hover:bg-white rounded transition-colors"
-                        title="History"
-                      >
-                        <Icon name="clock" size={13} />
-                      </button>
                       {can("manage_inventory") && (
                         <button
                           onClick={() => handleEdit(mat)}
@@ -688,18 +647,6 @@ export const InventoryView: React.FC = () => {
         isOpen={isAddEditOpen}
         onClose={() => setIsAddEditOpen(false)}
         materialToEdit={materialToEdit}
-      />
-
-      <StockMovementModal
-        isOpen={isMovementOpen}
-        onClose={() => setIsMovementOpen(false)}
-        selectedMaterial={movementMaterial}
-      />
-
-      <StockHistoryDrawer
-        isOpen={!!historyMaterial}
-        onClose={() => setHistoryMaterial(null)}
-        material={historyMaterial}
       />
 
       {/* Model Group Information & Analytics Modal */}
