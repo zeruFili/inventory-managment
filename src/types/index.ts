@@ -13,6 +13,13 @@ export interface User {
   role: UserRole;
   avatar: string;
   branch: string;
+  phone?: string;
+  department?: string;
+  jobTitle?: string;
+  status?: "Active" | "Pending" | "Suspended";
+  password?: string;
+  notes?: string;
+  createdAt?: string;
 }
 
 export type MaterialCondition = "New" | "Excellent" | "Good" | "Fair" | "Damaged" | "Beyond Repair" | "Decommissioned";

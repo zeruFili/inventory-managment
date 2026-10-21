@@ -69,6 +69,21 @@ interface AppContextType {
   
   // Role & Permissions
   switchUserRole: (role: UserRole) => void;
+  assumeUser: (userId: string) => void;
+  addUser: (userData: {
+    name: string;
+    email: string;
+    role: UserRole;
+    branch: string;
+    avatar?: string;
+    phone?: string;
+    password?: string;
+    department?: string;
+    jobTitle?: string;
+    status?: "Active" | "Pending" | "Suspended";
+    notes?: string;
+  }) => User;
+  deleteUser: (userId: string) => void;
   can: (permission: Permission) => boolean;
   showToast: (message: string, type?: "success" | "warning" | "error" | "info") => void;
 
@@ -158,7 +173,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [users] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>(initialUsers);
   const [currentUser, setCurrentUser] = useState<User>(initialUsers[0]); // default admin
   const [materials, setMaterials] = useState<Material[]>(initialMaterials);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>(initialStockMovements);
@@ -213,6 +228,84 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
     setCurrentUser(found);
     showToast(`Switched active view to role: ${role.replace("_", " ").toUpperCase()}`, "info");
+  };
+
+  const assumeUser = (userId: string) => {
+    const found = users.find((u) => u.id === userId);
+    if (found) {
+      setCurrentUser(found);
+      showToast(`Now operating as ${found.name} (${found.role.replace("_", " ").toUpperCase()})`, "info");
+    }
+  };
+
+  const addUser = (userData: {
+    name: string;
+    email: string;
+    role: UserRole;
+    branch: string;
+    avatar?: string;
+    phone?: string;
+    password?: string;
+    department?: string;
+    jobTitle?: string;
+    status?: "Active" | "Pending" | "Suspended";
+    notes?: string;
+  }): User => {
+    const nextNum = users.length + 1;
+    const newId = `usr-${nextNum.toString().padStart(2, "0")}`;
+    const initials =
+      userData.avatar?.trim() ||
+      userData.name
+        .trim()
+        .split(/\s+/)
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) ||
+      "U";
+
+    const newUser: User = {
+      id: newId,
+      name: userData.name.trim(),
+      email: userData.email.trim(),
+      role: userData.role,
+      branch: userData.branch.trim() || "Central Warehouse",
+      avatar: initials,
+      phone: userData.phone?.trim() || undefined,
+      password: userData.password ? "••••••••" : undefined,
+      department: userData.department?.trim() || undefined,
+      jobTitle: userData.jobTitle?.trim() || undefined,
+      status: userData.status || "Active",
+      notes: userData.notes?.trim() || undefined,
+      createdAt: new Date().toISOString().slice(0, 10),
+    };
+
+    setUsers((prev) => [...prev, newUser]);
+    logAudit(
+      "CREATE_USER",
+      "Security",
+      newId,
+      `Created user account: ${newUser.name} (${newUser.role}) - Branch: ${newUser.branch}`
+    );
+    showToast(`User account "${newUser.name}" successfully created.`);
+    return newUser;
+  };
+
+  const deleteUser = (userId: string) => {
+    const target = users.find((u) => u.id === userId);
+    if (!target) return;
+    if (target.id === currentUser.id) {
+      showToast("Cannot remove the currently active user.", "warning");
+      return;
+    }
+    setUsers((prev) => prev.filter((u) => u.id !== userId));
+    logAudit(
+      "DELETE_USER",
+      "Security",
+      userId,
+      `Removed user account: ${target.name} (${target.role})`
+    );
+    showToast(`User account "${target.name}" removed.`, "info");
   };
 
   // Role permissions checker
@@ -1160,6 +1253,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       auditLogs,
       toast,
       switchUserRole,
+      assumeUser,
+      addUser,
+      deleteUser,
       can,
       showToast,
       addMaterial,
